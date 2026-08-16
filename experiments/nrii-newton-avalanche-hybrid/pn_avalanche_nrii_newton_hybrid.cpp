@@ -1,0 +1,6 @@
+#include "source_parts/pn_hybrid_part01.inc"
+#include "source_parts/pn_hybrid_part02.inc"
+#include "source_parts/pn_hybrid_part03.inc"
+#include "source_parts/pn_hybrid_part04.inc"
+#include "source_parts/pn_hybrid_part05.inc"
+#include "source_parts/pn_hybrid_part06.inc"
