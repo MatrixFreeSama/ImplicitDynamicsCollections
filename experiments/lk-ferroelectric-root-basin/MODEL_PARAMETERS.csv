@@ -1,0 +1,14 @@
+parameter,value
+model,dimensionless homogeneous Landau-Khalatnikov second-order ferroelectric constitutive switching
+free_energy,F(P)=-0.5*P^2+0.25*P^4-E*P
+dynamics,dP/dt=P-P^3+E
+implicit_family,P(h)=P0+h*dt*(P(h)-P(h)^3+E)
+P0,-0.29999999999999999
+E,0.20000000000000001
+critical_dt,1.3698630136986301
+residual_tolerance,1e-08
+nrii_max_declared_p,160
+pade_max_m,32
+pade_denominator_sample_count,4097
+newton,analytic_jacobian_plus_Armijo_from_P0_no_homotopy
+reference,independent_100000_step_h_continuation_not_used_by_solvers
