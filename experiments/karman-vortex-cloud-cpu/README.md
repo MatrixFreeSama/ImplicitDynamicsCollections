@@ -5,7 +5,7 @@ This directory contains only **cloud-generated CPU reference material**. It inte
 ## Files
 
 - `nrii_cpu_cloud_bench.cpp`  
-  Twelve-step native CPU reference comparing adaptive-order NRII + Chebyshev/rational continuation against inexact Newton + analytic matrix-free Jv + restarted GMRES + Jacobi + Armijo.
+  Twelve-step native CPU reference comparing adaptive-order NRII + Chebyshev/Padé continuation against inexact Newton + analytic matrix-free Jv + restarted GMRES + Jacobi + Armijo.
 
 - `nrii_karman_equal_time.cpp`  
   One-step residual-versus-wall-time driver. Each NRII order is an independent declared run; residual is measured after the run rather than used to increase the order inside the same attempt.
