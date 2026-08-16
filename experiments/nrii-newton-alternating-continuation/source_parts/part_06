@@ -1,0 +1,130 @@
+    auto st=chrono::steady_clock::now(); CoeffBank B=build_coeff_bank(N,P,E,p); FullBodyResult R=evaluate_bank_fullbody(B,p); auto en=chrono::steady_clock::now(); R.ms=chrono::duration<double,milli>(en-st).count(); return R;
+}
+
+
+struct HybridPredictor {
+    bool ok=false;
+    int p=0,m0=0,m1=0,m2=0;
+    double tail=INFINITY,min_den=0,res=INFINITY,minn=0,minp=0;
+    vector<double> n,pv,ph;
+};
+
+static HybridPredictor make_hybrid_predictor(const CoeffBank&B,int p){
+    HybridPredictor H; H.p=p;
+    if(!B.finite || p>B.K || p<2) return H;
+    H.tail=cheb_tail_ratio_bank(B,p);
+    array<PadeFit,3> F;
+    for(int c=0;c<3;c++){ F[c]=identify_pade_component_bank(B,p,c); if(!F[c].ok) return H; }
+    H.m0=F[0].m; H.m1=F[1].m; H.m2=F[2].m;
+    H.min_den=min(F[0].min_den,min(F[1].min_den,F[2].min_den));
+    int W=B.W; H.n.resize(W);H.pv.resize(W);H.ph.resize(W);
+    H.minn=1e300;H.minp=1e300;
+    for(int i=0;i<W;i++){
+        for(int comp=0;comp<3;comp++){
+            auto &fit=F[comp]; long double den=1.0; for(double q:fit.q) den+=q; long double num=0;
+            for(int k=0;k<=fit.L;k++){
+                long double pk=0;
+                for(int j=0;j<=fit.m && j<=k;j++){
+                    double q=(j==0?1.0:fit.q[j-1]);
+                    double c=(comp==0?B.cn[k-j][i]:(comp==1?B.cp[k-j][i]:B.cphi[k-j][i]));
+                    pk+=(long double)q*c;
+                }
+                num+=pk;
+            }
+            double val=(double)(num/den);
+            if(comp==0) H.n[i]=val; else if(comp==1) H.pv[i]=val; else H.ph[i]=val;
+        }
+        H.minn=min(H.minn,H.n[i]); H.minp=min(H.minp,H.pv[i]);
+    }
+    double dummy1,dummy2;
+    H.res=candidate_residual(B,p,F,dummy1,dummy2);
+    H.ok=isfinite(H.res)&&isfinite(H.tail)&&H.tail<=sqrt(B.P.tol)&&H.min_den>0&&H.minn>0&&H.minp>0;
+    return H;
+}
+
+
+
+static HybridPredictor make_hybrid_predictor_theta(const CoeffBank&B,int p,double theta){
+    HybridPredictor bad; bad.p=p;
+    if(!(theta>0.0 && theta<=1.0) || !B.finite || p>B.K || p<2) return bad;
+    CoeffBank S; S.W=B.W; S.K=p; S.N=B.N; S.g0=B.g0; S.P=B.P; S.finite=B.finite; S.reanchored=B.reanchored;
+    S.target_n=B.target_n; S.target_p=B.target_p; S.eqphi=B.eqphi;
+    S.cn.assign(p+1,vector<double>(B.W)); S.cp.assign(p+1,vector<double>(B.W)); S.cphi.assign(p+1,vector<double>(B.W));
+    long double scale=1.0L;
+    for(int k=0;k<=p;k++){
+        double sc=(double)scale;
+        #pragma omp parallel for schedule(static)
+        for(int i=0;i<B.W;i++){ S.cn[k][i]=B.cn[k][i]*sc; S.cp[k][i]=B.cp[k][i]*sc; S.cphi[k][i]=B.cphi[k][i]*sc; }
+        scale*=theta;
+    }
+    return make_hybrid_predictor(S,p);
+}
+
+static int choose_safe_predictor_theta(const CoeffBank& scout,const vector<int>& declared_ps,double theta,HybridPredictor& chosen_pred){
+    for(int pp:declared_ps){ auto pr=make_hybrid_predictor_theta(scout,pp,theta); if(pr.ok){ chosen_pred=std::move(pr); return pp; } }
+    return -1;
+}
+
+struct AlternatingResult {
+    bool ok=false;
+    int rungs=0;
+    int total_newton_iters=0;
+    double final_res=INFINITY;
+    double min_alpha=1.0;
+    double total_ms=0.0;
+    vector<int> rung_p;
+    vector<double> rung_seed_res;
+    vector<double> rung_after_newton_res;
+};
+
+static int choose_safe_predictor(const CoeffBank& scout,const vector<int>& declared_ps,HybridPredictor& chosen_pred){
+    for(int pp:declared_ps){
+        auto pr=make_hybrid_predictor(scout,pp);
+        if(pr.ok){ chosen_pred=std::move(pr); return pp; }
+    }
+    return -1;
+}
+
+static AlternatingResult run_alternating(long long N,const Params&P,const EqProfile&E,
+                                         const vector<int>&declared_ps,int maxP,int max_rungs,int newton_burst){
+    AlternatingResult A;
+    vector<double> anchor_n,anchor_p,anchor_ph;
+    bool have_anchor=false;
+    auto wall0=chrono::steady_clock::now();
+    for(int rung=0;rung<max_rungs;rung++){
+        CoeffBank scout=have_anchor?build_coeff_bank_anchor(N,P,E,maxP,&anchor_n,&anchor_p,&anchor_ph)
+                                   :build_coeff_bank(N,P,E,maxP);
+        HybridPredictor selected;
+        int chosen=choose_safe_predictor(scout,declared_ps,selected);
+        if(chosen<0) break;
+        // Timed predictor generation at the declared handoff order.
+        CoeffBank B=have_anchor?build_coeff_bank_anchor(N,P,E,chosen,&anchor_n,&anchor_p,&anchor_ph)
+                               :build_coeff_bank(N,P,E,chosen);
+        HybridPredictor pred=make_hybrid_predictor(B,chosen);
+        if(!pred.ok) break;
+        A.rung_p.push_back(chosen); A.rung_seed_res.push_back(pred.res);
+
+        vector<double> nn,pp,ph;
+        LocalNewtonResult burst=run_local_newton(N,P,E,&pred.n,&pred.pv,&pred.ph,newton_burst,&nn,&pp,&ph);
+        A.rungs=rung+1; A.total_newton_iters+=burst.iters; A.min_alpha=min(A.min_alpha,burst.min_alpha);
+        A.rung_after_newton_res.push_back(burst.res);
+        A.final_res=burst.res;
+        if(burst.ok){ A.ok=true; break; }
+        if(nn.empty()||pp.empty()||ph.empty()||!isfinite(burst.res)) break;
+        // Newton's partially corrected state becomes the next NRII homotopy anchor.
+        anchor_n.swap(nn); anchor_p.swap(pp); anchor_ph.swap(ph); have_anchor=true;
+    }
+    auto wall1=chrono::steady_clock::now(); A.total_ms=chrono::duration<double,milli>(wall1-wall0).count();
+    return A;
+}
+
+static string join_ints(const vector<int>&v){ string s; for(size_t i=0;i<v.size();i++){ if(i)s+=';'; s+=to_string(v[i]); } return s; }
+static string join_doubles(const vector<double>&v){ ostringstream o; o<<setprecision(8); for(size_t i=0;i<v.size();i++){ if(i)o<<';'; o<<v[i]; } return o.str(); }
+
+
+struct AltThetaResult {
+    bool ok=false;
+    int rungs=0,total_newton_iters=0;
+    double final_res=INFINITY,min_alpha=1.0,total_ms=0.0;
+    vector<int> rung_p;
+    vector<double> rung_seed_res,rung_after_newton_res;

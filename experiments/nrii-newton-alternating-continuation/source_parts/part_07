@@ -1,0 +1,96 @@
+};
+
+static AltThetaResult run_alternating_theta(long long N,const Params&P,const EqProfile&E,
+                                            const vector<int>&declared_ps,int maxP,
+                                            double theta,int newton_burst,int max_rungs){
+    AltThetaResult A; vector<double> an,ap,af; bool have_anchor=false;
+    auto t0=chrono::steady_clock::now();
+    for(int rung=0;rung<max_rungs;rung++){
+        CoeffBank scout=have_anchor?build_coeff_bank_anchor(N,P,E,maxP,&an,&ap,&af):build_coeff_bank(N,P,E,maxP);
+        HybridPredictor pred; int pp=choose_safe_predictor_theta(scout,declared_ps,theta,pred);
+        if(pp<0) break;
+        CoeffBank B=have_anchor?build_coeff_bank_anchor(N,P,E,pp,&an,&ap,&af):build_coeff_bank(N,P,E,pp);
+        pred=make_hybrid_predictor_theta(B,pp,theta); if(!pred.ok) break;
+        vector<double> nn,np,nf;
+        auto nr=run_local_newton(N,P,E,&pred.n,&pred.pv,&pred.ph,newton_burst,&nn,&np,&nf);
+        A.rung_p.push_back(pp); A.rung_seed_res.push_back(pred.res); A.rung_after_newton_res.push_back(nr.res);
+        A.rungs=rung+1; A.total_newton_iters+=nr.iters; A.final_res=nr.res; A.min_alpha=min(A.min_alpha,nr.min_alpha);
+        if(nr.ok){ A.ok=true; break; }
+        if(nn.empty()||np.empty()||nf.empty()||!isfinite(nr.res)) break;
+        an.swap(nn); ap.swap(np); af.swap(nf); have_anchor=true;
+    }
+    auto t1=chrono::steady_clock::now(); A.total_ms=chrono::duration<double,milli>(t1-t0).count(); return A;
+}
+
+
+struct ReciprocalFeedbackResult {
+    bool ok=false;
+    int rungs=0,candidate_trials=0,total_newton_burst_iters=0;
+    double final_res=INFINITY,total_ms=0.0;
+    vector<double> accepted_theta;
+    vector<int> accepted_p;
+};
+
+static ReciprocalFeedbackResult run_reciprocal_feedback(long long N,const Params&P,const EqProfile&E,
+                                                        const vector<int>&orders,const vector<double>&thetas,
+                                                        int maxP,int newton_burst,int max_rungs){
+    vector<double> anchor_n,anchor_p,anchor_ph; bool have_anchor=false; ReciprocalFeedbackResult A;
+    auto wall0=chrono::steady_clock::now();
+    for(int rung=0;rung<max_rungs;rung++){
+        CoeffBank scout=have_anchor?build_coeff_bank_anchor(N,P,E,maxP,&anchor_n,&anchor_p,&anchor_ph)
+                                   :build_coeff_bank(N,P,E,maxP);
+        bool any=false; double best_res=INFINITY,best_theta=0.0; int best_p=-1;
+        vector<double> best_n,best_pv,best_ph;
+        for(double theta:thetas){
+            HybridPredictor pred; int pp=choose_safe_predictor_theta(scout,orders,theta,pred);
+            if(pp<0) continue;
+            CoeffBank B=have_anchor?build_coeff_bank_anchor(N,P,E,pp,&anchor_n,&anchor_p,&anchor_ph)
+                                   :build_coeff_bank(N,P,E,pp);
+            pred=make_hybrid_predictor_theta(B,pp,theta); if(!pred.ok) continue;
+            vector<double> nn,np,nf;
+            auto nr=run_local_newton(N,P,E,&pred.n,&pred.pv,&pred.ph,newton_burst,&nn,&np,&nf);
+            A.candidate_trials++; A.total_newton_burst_iters+=nr.iters;
+            if(nr.ok){
+                A.ok=true; A.rungs=rung+1; A.final_res=nr.res;
+                A.accepted_theta.push_back(theta); A.accepted_p.push_back(pp);
+                auto wall1=chrono::steady_clock::now(); A.total_ms=chrono::duration<double,milli>(wall1-wall0).count();
+                return A;
+            }
+            if(!nn.empty()&&isfinite(nr.res)&&nr.res<best_res){
+                any=true; best_res=nr.res; best_theta=theta; best_p=pp;
+                best_n=std::move(nn); best_pv=std::move(np); best_ph=std::move(nf);
+            }
+        }
+        if(!any) break;
+        anchor_n.swap(best_n); anchor_p.swap(best_pv); anchor_ph.swap(best_ph); have_anchor=true;
+        A.rungs=rung+1; A.final_res=best_res; A.accepted_theta.push_back(best_theta); A.accepted_p.push_back(best_p);
+    }
+    auto wall1=chrono::steady_clock::now(); A.total_ms=chrono::duration<double,milli>(wall1-wall0).count();
+    return A;
+}
+
+static string join_theta(const vector<double>&v){ ostringstream o; o<<setprecision(4); for(size_t i=0;i<v.size();i++){ if(i)o<<';'; o<<v[i]; } return o.str(); }
+
+int main(int argc,char**argv){
+    omp_set_num_threads(5);
+    Params base; base.local_half=768; base.eq_half=512; base.dt=0.005; base.tol=1e-10;
+    EqProfile E=build_equilibrium(base); const long long N=1LL<<34;
+    const int MAXP=192;
+    const vector<int> declared_orders={16,24,32,48,64,80,96,112,128,160,192};
+    const vector<double> declared_theta={0.7,0.6,0.5,0.4,0.3};
+    const int newton_burst=2,max_rungs=12;
+    vector<double> drives={77,78,88,100,108,120,140,160,180,190,195,198,200};
+    if(argc>1){ drives.clear(); for(int i=1;i<argc;i++) drives.push_back(atof(argv[i])); }
+    cout<<setprecision(14);
+    cout<<"drive,pure_ok,pure_iters,pure_res,oneshot_ok,oneshot_p,oneshot_res,reciprocal_ok,reciprocal_rungs,candidate_trials,total_newton_burst_iters,reciprocal_res,total_ms,accepted_theta,accepted_p\n";
+    for(double drv:drives){
+        Params P=base; P.reverse_drive=drv;
+        auto pure=run_local_newton(N,P,E);
+        CoeffBank scout=build_coeff_bank(N,P,E,MAXP); HybridPredictor onepred; int onep=choose_safe_predictor(scout,declared_orders,onepred); LocalNewtonResult one{};
+        if(onep>0){ CoeffBank B=build_coeff_bank(N,P,E,onep); onepred=make_hybrid_predictor(B,onep); if(onepred.ok) one=run_local_newton(N,P,E,&onepred.n,&onepred.pv,&onepred.ph); }
+        auto rec=run_reciprocal_feedback(N,P,E,declared_orders,declared_theta,MAXP,newton_burst,max_rungs);
+        cout<<drv<<","<<(pure.ok?1:0)<<","<<pure.iters<<","<<pure.res<<","<<(one.ok?1:0)<<","<<onep<<","<<one.res<<","<<(rec.ok?1:0)<<","<<rec.rungs<<","<<rec.candidate_trials<<","<<rec.total_newton_burst_iters<<","<<rec.final_res<<","<<rec.total_ms<<","<<join_theta(rec.accepted_theta)<<","<<join_ints(rec.accepted_p)<<"\n";
+        cerr<<"drive="<<drv<<" pure="<<pure.ok<<" one="<<one.ok<<" reciprocal="<<rec.ok<<" rungs="<<rec.rungs<<" res="<<rec.final_res<<"\n";
+    }
+    return 0;
+}

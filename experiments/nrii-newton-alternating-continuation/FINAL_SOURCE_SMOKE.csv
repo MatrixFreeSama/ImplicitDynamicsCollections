@@ -1,0 +1,2 @@
+drive,pure_ok,pure_iters,pure_res,oneshot_ok,oneshot_p,oneshot_res,reciprocal_ok,reciprocal_rungs,candidate_trials,total_newton_burst_iters,reciprocal_res,total_ms,accepted_theta,accepted_p
+108,0,40,4.1355404862375,0,-1,0,1,10,46,92,1.9895196601283e-13,3244.162458,0.3;0.3;0.3;0.3;0.3;0.3;0.3;0.7;0.7;0.7,16;16;16;16;16;16;16;16;16;16

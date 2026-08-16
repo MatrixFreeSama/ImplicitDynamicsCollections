@@ -1,0 +1,130 @@
+                recconv+=B.cn[a][i]*B.cp[bb][i];
+            }
+            if(k==0)recconv-=1.0;
+            double Fn=P.Dn*lapn-P.mun*drift_n-P.krec*recconv+B.cg[k][i];
+            double Fp=P.Dp*lapp+P.mup*drift_p-P.krec*recconv+B.cg[k][i];
+            if(k==0 && has_anchor){
+                nn[i]=(B.target_n[i]-B.cn[0][i])+P.dt*Fn;
+                pp[i]=(B.target_p[i]-B.cp[0][i])+P.dt*Fp;
+            } else {
+                nn[i]=P.dt*Fn;
+                pp[i]=P.dt*Fp;
+            }
+        }
+        if(k==0 && has_anchor){
+            nn[0]=B.target_n[0]-B.cn[0][0]; pp[0]=B.target_p[0]-B.cp[0][0];
+            nn[W-1]=B.target_n[W-1]-B.cn[0][W-1]; pp[W-1]=B.target_p[W-1]-B.cp[0][W-1];
+        }
+        vector<double>rho(W);
+        #pragma omp parallel for schedule(static)
+        for(int i=0;i<W;i++) rho[i]=pp[i]-nn[i]-((k==0&&has_anchor)?rphi_anchor[i]:0.0);
+        poisson_local_from_rho(rho,B.cphi[k+1],g0,N,P);
+        const int r=k+1;
+        #pragma omp parallel for schedule(static)
+        for(int i=1;i<W-1;i++){
+            B.cE[r][i]=-(B.cphi[r][i+1]-B.cphi[r][i-1])/(2.0*P.dx);
+            double sk=0.0; for(int a=0;a<=r;a++) sk+=B.cE[a][i]*B.cE[r-a][i];
+            double yy=0.0; for(int a=1;a<r;a++) yy+=B.ce[a][i]*B.ce[r-a][i];
+            B.ce[r][i]=(sk-yy)/(2.0*B.ce[0][i]);
+            double sr=0.0; for(int a=1;a<=r;a++) sr+=B.ce[a][i]*B.cinv[r-a][i];
+            B.cinv[r][i]=-sr/B.ce[0][i]; B.cz[r][i]=-P.ion_B*B.cinv[r][i];
+            double se=0.0; for(int a=1;a<=r;a++) se+=(double)a*B.cz[a][i]*B.calpha[r-a][i];
+            B.calpha[r][i]=se/(double)r;
+            double sae=0.0; for(int a=0;a<=r;a++) sae+=B.calpha[a][i]*B.ce[r-a][i]; B.cae[r][i]=sae;
+            B.cv[r][i]=P.mun*B.cn[r][i]+P.mup*B.cp[r][i];
+            double sg=0.0; for(int a=0;a<=r;a++) sg+=B.cae[a][i]*B.cv[r-a][i]; B.cg[r][i]=P.ion_gamma*sg;
+        }
+        double bad=0.0;
+        #pragma omp parallel for reduction(max:bad) schedule(static)
+        for(int i=0;i<W;i++) if(!isfinite(nn[i])||!isfinite(pp[i])||!isfinite(B.cphi[k+1][i])||!isfinite(B.cg[k+1][i])) bad=1.0;
+        if(bad){B.finite=false;B.K=k+1;break;}
+    }
+    return B;
+}
+
+static CoeffBank build_coeff_bank(long long N,const Params&P,const EqProfile&E,int K){
+    return build_coeff_bank_anchor(N,P,E,K,nullptr,nullptr,nullptr);
+}
+
+static double cheb_tail_ratio_bank(const CoeffBank&B,int p){
+    auto T=cheb_matrix_d(p); int W=B.W; int root=1; while(root*root<p+1)root++; int tailstart=(p+1)-root;
+    long double tail2=0,total2=0;
+    #pragma omp parallel for reduction(+:tail2,total2) schedule(static)
+    for(int i=0;i<W;i++){
+        long double tt=0,aa=0;
+        for(int comp=0;comp<3;comp++){
+            for(int k=0;k<=p;k++){
+                long double s=0; for(int j=k;j<=p;j++){ double c=(comp==0?B.cn[j][i]:(comp==1?B.cp[j][i]:B.cphi[j][i])); s+=(long double)T[(size_t)k*(p+1)+j]*c; }
+                aa+=s*s; if(k>=tailstart)tt+=s*s;
+            }
+        }
+        total2+=aa; tail2+=tt;
+    }
+    return total2>0?sqrt((double)(tail2/total2)):0.0;
+}
+
+static vector<double> component_gram(const CoeffBank&B,int p,int comp){
+    vector<double> G((size_t)(p+1)*(p+1),0.0); int W=B.W;
+    for(int a=0;a<=p;a++) for(int b=a;b<=p;b++){
+        long double s=0;
+        #pragma omp parallel for reduction(+:s) schedule(static)
+        for(int i=0;i<W;i++){ double x=(comp==0?B.cn[a][i]:(comp==1?B.cp[a][i]:B.cphi[a][i])); double y=(comp==0?B.cn[b][i]:(comp==1?B.cp[b][i]:B.cphi[b][i])); s+=(long double)x*y; }
+        G[(size_t)a*(p+1)+b]=G[(size_t)b*(p+1)+a]=(double)s;
+    }
+    return G;
+}
+
+struct PadeFit { bool ok=false; int m=0,L=0; vector<double>q; double min_den=0; };
+static PadeFit identify_pade_component_bank(const CoeffBank&B,int p,int comp){
+    auto G=component_gram(B,p,comp); int stride=p+1;
+    for(int m=p/2;m>0;m--){ int L=p-m; vector<double>A((size_t)m*m),rhs(m),x;
+        for(int ii=1;ii<=m;ii++){
+            for(int jj=1;jj<=m;jj++){ long double s=0; for(int k=L+1;k<=p;k++)s+=G[(size_t)(k-ii)*stride+(k-jj)]; A[(size_t)(ii-1)*m+jj-1]=(double)s; }
+            long double s=0; for(int k=L+1;k<=p;k++)s-=G[(size_t)(k-ii)*stride+k]; rhs[ii-1]=(double)s;
+        }
+        if(solve_linear_vec(A,rhs,x,m)){
+            double md=0; if(!denominator_gate_d(x,md)) return {}; // same zero-fallback rule: unsafe highest solvable denominator rejects this p
+            PadeFit f; f.ok=true; f.m=m; f.L=L; f.q=x; f.min_den=md; return f;
+        }
+    }
+    return {};
+}
+
+static double candidate_residual(const CoeffBank&B,int p,const array<PadeFit,3>&F,double&minn,double&minp){
+    int W=B.W; const Params&P=B.P; double invh2=1.0/(P.dx*P.dx); vector<double>n(W),pp(W),ph(W),vext(W); minn=1e300;minp=1e300;
+    for(int i=0;i<W;i++) vext[i]=vext_at_global(B.g0+i,B.N,P);
+    #pragma omp parallel for reduction(min:minn,minp) schedule(static)
+    for(int i=0;i<W;i++){
+        for(int comp=0;comp<3;comp++){
+            auto &fit=F[comp]; long double den=1.0; for(double q:fit.q)den+=q; long double num=0;
+            for(int k=0;k<=fit.L;k++){ long double pk=0; for(int j=0;j<=fit.m&&j<=k;j++){ double q=(j==0?1.0:fit.q[j-1]); double c=(comp==0?B.cn[k-j][i]:(comp==1?B.cp[k-j][i]:B.cphi[k-j][i])); pk+=(long double)q*c; } num+=pk; }
+            double val=(double)(num/den); if(comp==0)n[i]=val; else if(comp==1)pp[i]=val; else ph[i]=val;
+        }
+        minn=min(minn,n[i]);minp=min(minp,pp[i]);
+    }
+    double maxr=0.0;
+    #pragma omp parallel for reduction(max:maxr) schedule(static)
+    for(int i=2;i<W-2;i++){
+        double lapn=(n[i+1]-2*n[i]+n[i-1])*invh2, lapp=(pp[i+1]-2*pp[i]+pp[i-1])*invh2;
+        double dtr=(ph[i+1]+vext[i+1])-(ph[i]+vext[i]), dtl=(ph[i]+vext[i])-(ph[i-1]+vext[i-1]);
+        double drn=0.5*((n[i]+n[i+1])*dtr-(n[i-1]+n[i])*dtl)*invh2;
+        double drp=0.5*((pp[i]+pp[i+1])*dtr-(pp[i-1]+pp[i])*dtl)*invh2;
+        double rec=P.krec*(n[i]*pp[i]-1.0); double G=avalanche_G_point(n[i],pp[i],ph[i-1],ph[i+1],vext[i-1],vext[i+1],P);
+        double Fn=P.Dn*lapn-P.mun*drn-rec+G, Fp=P.Dp*lapp+P.mup*drp-rec+G;
+        double rn=n[i]-B.target_n[i]-P.dt*Fn, rp=pp[i]-B.target_p[i]-P.dt*Fp;
+        long long gi=B.g0+i; double C=doping_at_global(gi,B.N,P); double rf=-P.lambda2*(ph[i+1]-2*ph[i]+ph[i-1])*invh2-(pp[i]-n[i]+C);
+        maxr=max(maxr,max(abs(rn),max(abs(rp),abs(rf))));
+    }
+    return maxr;
+}
+
+struct FullBodyResult { bool ok=false,cheb_ok=false,pade_ok=false; int p=0,m0=0,m1=0,m2=0; double ms=0,res=INFINITY,tail=INFINITY,minden=0,minn=0,minp=0; };
+static FullBodyResult evaluate_bank_fullbody(const CoeffBank&B,int p){
+    FullBodyResult R;R.p=p;if(!B.finite||p>B.K||p<2)return R;
+    R.tail=cheb_tail_ratio_bank(B,p); R.cheb_ok=isfinite(R.tail)&&R.tail<=sqrt(B.P.tol); if(!R.cheb_ok)return R;
+    array<PadeFit,3>F; for(int c=0;c<3;c++){ F[c]=identify_pade_component_bank(B,p,c); if(!F[c].ok)return R; }
+    R.pade_ok=true;R.m0=F[0].m;R.m1=F[1].m;R.m2=F[2].m;R.minden=min(F[0].min_den,min(F[1].min_den,F[2].min_den));
+    R.res=candidate_residual(B,p,F,R.minn,R.minp); R.ok=isfinite(R.res)&&R.res<=B.P.tol; return R;
+}
+
+static FullBodyResult run_fullbody_once(long long N,const Params&P,const EqProfile&E,int p){

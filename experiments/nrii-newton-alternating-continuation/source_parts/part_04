@@ -1,0 +1,130 @@
+}
+
+// ===== Full NRII body: coefficient construction + Chebyshev audit + Pade rational continuation =====
+static double binom_d(int n,int k){ if(k<0||k>n) return 0.0; if(k>n-k)k=n-k; double r=1.0; for(int i=1;i<=k;i++) r=r*(double)(n-k+i)/(double)i; return r; }
+
+static vector<double> cheb_matrix_d(int p){
+    vector<double> T((size_t)(p+1)*(p+1),0.0);
+    for(int j=0;j<=p;j++){
+        double zj=ldexp(1.0,-j);
+        for(int rr=0;rr<=j;rr++){
+            double cx=binom_d(j,rr)*zj;
+            if(rr==0){ T[j]+=cx; continue; }
+            for(int k=(rr&1);k<=rr;k+=2){
+                double ck=(k==0?binom_d(rr,rr/2):2.0*binom_d(rr,(rr-k)/2))*ldexp(1.0,-rr);
+                T[(size_t)k*(p+1)+j]+=cx*ck;
+            }
+        }
+    }
+    return T;
+}
+
+static bool solve_linear_vec(vector<double>A, vector<double>b, vector<double>&x, int n){
+    x.assign(n,0.0); double norm=0.0; for(double v:A) norm=max(norm,abs(v)); if(!(norm>0.0)) return false;
+    for(int k=0;k<n;k++){
+        int piv=k; double best=0.0; for(int i=k;i<n;i++){ double v=abs(A[(size_t)i*n+k]); if(v>best){best=v;piv=i;} }
+        if(best<=numeric_limits<double>::epsilon()*(double)n*norm) return false;
+        if(piv!=k){ for(int j=k;j<n;j++) swap(A[(size_t)k*n+j],A[(size_t)piv*n+j]); swap(b[k],b[piv]); }
+        for(int i=k+1;i<n;i++){
+            double f=A[(size_t)i*n+k]/A[(size_t)k*n+k]; A[(size_t)i*n+k]=0.0;
+            for(int j=k+1;j<n;j++) A[(size_t)i*n+j]-=f*A[(size_t)k*n+j]; b[i]-=f*b[k];
+        }
+    }
+    for(int i=n-1;i>=0;i--){ double v=b[i]; for(int j=i+1;j<n;j++) v-=A[(size_t)i*n+j]*x[j]; x[i]=v/A[(size_t)i*n+i]; }
+    return true;
+}
+
+static double bern_coeff_power_d(const vector<double>&q,int m,int k){
+    double s=1.0; for(int j=1;j<=k&&j<=m;j++) s+=q[j-1]*binom_d(k,j)/binom_d(m,j); return s;
+}
+static bool bern_safe_rec_d(const vector<double>&b,int m,int depth,int maxdepth,double floor,double&minabs){
+    bool pos=true,neg=true; double mn=1e300;
+    for(int i=0;i<=m;i++){ if(b[i]<=floor)pos=false; if(b[i]>=-floor)neg=false; mn=min(mn,abs(b[i])); }
+    if(pos||neg){ minabs=min(minabs,mn); return true; }
+    if(depth>=maxdepth) return false;
+    vector<double> work=b,left(m+1),right(m+1); left[0]=work[0]; right[m]=work[m];
+    for(int r=1;r<=m;r++){ for(int j=0;j<=m-r;j++) work[j]=0.5*(work[j]+work[j+1]); left[r]=work[0]; right[m-r]=work[m-r]; }
+    return bern_safe_rec_d(left,m,depth+1,maxdepth,floor,minabs)&&bern_safe_rec_d(right,m,depth+1,maxdepth,floor,minabs);
+}
+static bool denominator_gate_d(const vector<double>&q,double&minabs){
+    int m=(int)q.size(); if(m==0){minabs=1.0; return true;} double qnorm=1.0; for(double v:q)qnorm+=abs(v);
+    double floor=sqrt(numeric_limits<double>::epsilon())*qnorm;
+    // Cap subdivision depth at 30. This is already much finer than the double safety floor for m<=64.
+    int maxdepth=30;
+    vector<double>b(m+1); for(int i=0;i<=m;i++)b[i]=bern_coeff_power_d(q,m,i);
+    minabs=1e300; return bern_safe_rec_d(b,m,0,maxdepth,floor,minabs);
+}
+
+struct CoeffBank {
+    int W=0,K=0; long long N=0,g0=0; Params P;
+    vector<vector<double>> cn,cp,cphi,cE,ce,cinv,cz,calpha,cae,cv,cg;
+    vector<double> target_n,target_p,eqphi;
+    bool finite=true;
+    bool reanchored=false;
+};
+
+// Re-anchored NRII homotopy for the same final implicit equation.
+// Carrier equations:
+//   U(h) = S + h[(U_old-S) + dt*F(U(h))]
+// so h=0 is the supplied anchor S and h=1 is exactly the original target equation.
+// Therefore C1 = U_old-S+dt*F_0 = -R_carrier(S), while C{k+1}=dt*F_k for k>=1.
+// Poisson is re-anchored consistently through
+//   R_phi(U(h)) = (1-h) R_phi(S),
+// so the final h=1 target still satisfies the original Poisson equation.
+static CoeffBank build_coeff_bank_anchor(long long N,const Params&P,const EqProfile&E,int K,
+                                         const vector<double>* anchor_n=nullptr,
+                                         const vector<double>* anchor_p=nullptr,
+                                         const vector<double>* anchor_ph=nullptr){
+    CoeffBank B; B.W=2*P.local_half+1; B.K=K; B.N=N; B.g0=N/2-P.local_half; B.P=P;
+    int W=B.W; long long center=N/2,g0=B.g0,g1=g0+W-1; double invh2=1.0/(P.dx*P.dx);
+    auto alloc=[&](vector<vector<double>>&x){x.assign(K+1,vector<double>(W,0.0));};
+    alloc(B.cn);alloc(B.cp);alloc(B.cphi);alloc(B.cE);alloc(B.ce);alloc(B.cinv);alloc(B.cz);alloc(B.calpha);alloc(B.cae);alloc(B.cv);alloc(B.cg);
+    B.target_n.resize(W); B.target_p.resize(W); B.eqphi.resize(W);
+    vector<double> vext(W);
+    for(int t=0;t<W;t++){
+        long long gi=g0+t; double n,p,ph; eq_at(gi,N,P,E,n,p,ph); double x=(double)(gi-center)/P.pulse_sigma_cells;
+        double pulse=P.pulse_amp*exp(-0.5*x*x);
+        B.target_n[t]=n+pulse; B.target_p[t]=p+pulse; B.eqphi[t]=ph; vext[t]=vext_at_global(gi,N,P);
+    }
+    const bool has_anchor=anchor_n&&anchor_p&&anchor_ph&&(int)anchor_n->size()==W&&(int)anchor_p->size()==W&&(int)anchor_ph->size()==W;
+    B.reanchored=has_anchor;
+    for(int t=0;t<W;t++){
+        B.cn[0][t]=has_anchor?(*anchor_n)[t]:B.target_n[t];
+        B.cp[0][t]=has_anchor?(*anchor_p)[t]:B.target_p[t];
+        B.cphi[0][t]=has_anchor?(*anchor_ph)[t]:B.eqphi[t];
+    }
+
+    // Poisson residual of the supplied anchor, with the same exact implicit-bulk tail coupling as local Newton.
+    vector<double> rphi_anchor(W,0.0);
+    if(has_anchor){
+        const double alphaL=(double)(g0-1)/(double)g0;
+        const double alphaR=(double)(N-2-g1)/(double)(N-1-g1);
+        for(int i=0;i<W;i++){
+            long long gi=g0+i; double dop=doping_at_global(gi,N,P);
+            double phim=(i==0)?(B.eqphi[0]+alphaL*(B.cphi[0][0]-B.eqphi[0])):B.cphi[0][i-1];
+            double phip=(i==W-1)?(B.eqphi[W-1]+alphaR*(B.cphi[0][W-1]-B.eqphi[W-1])):B.cphi[0][i+1];
+            rphi_anchor[i]=-P.lambda2*(phip-2*B.cphi[0][i]+phim)*invh2-(B.cp[0][i]-B.cn[0][i]+dop);
+        }
+    }
+
+    // Derived analytic series for the smooth impact-ionization source.
+    #pragma omp parallel for schedule(static)
+    for(int i=1;i<W-1;i++){
+        B.cE[0][i]=-((B.cphi[0][i+1]+vext[i+1])-(B.cphi[0][i-1]+vext[i-1]))/(2.0*P.dx);
+        double s0=B.cE[0][i]*B.cE[0][i]+P.ion_Efloor*P.ion_Efloor;
+        B.ce[0][i]=sqrt(s0); B.cinv[0][i]=1.0/B.ce[0][i]; B.cz[0][i]=-P.ion_B*B.cinv[0][i];
+        B.calpha[0][i]=P.ion_A*exp(B.cz[0][i]); B.cae[0][i]=B.calpha[0][i]*B.ce[0][i];
+        B.cv[0][i]=P.mun*B.cn[0][i]+P.mup*B.cp[0][i]; B.cg[0][i]=P.ion_gamma*B.cae[0][i]*B.cv[0][i];
+    }
+    for(int k=0;k<K;k++){
+        auto &nn=B.cn[k+1],&pp=B.cp[k+1];
+        #pragma omp parallel for schedule(static)
+        for(int i=1;i<W-1;i++){
+            double lapn=(B.cn[k][i+1]-2*B.cn[k][i]+B.cn[k][i-1])*invh2;
+            double lapp=(B.cp[k][i+1]-2*B.cp[k][i]+B.cp[k][i-1])*invh2;
+            double drift_n=0.0,drift_p=0.0,recconv=0.0;
+            for(int a=0;a<=k;a++){ int bb=k-a;
+                double dr=B.cphi[bb][i+1]-B.cphi[bb][i], dl=B.cphi[bb][i]-B.cphi[bb][i-1];
+                if(bb==0){ dr+=vext[i+1]-vext[i]; dl+=vext[i]-vext[i-1]; }
+                double frn=0.5*(B.cn[a][i]+B.cn[a][i+1])*dr, fln=0.5*(B.cn[a][i-1]+B.cn[a][i])*dl; drift_n+=(frn-fln)*invh2;
+                double frp=0.5*(B.cp[a][i]+B.cp[a][i+1])*dr, flp=0.5*(B.cp[a][i-1]+B.cp[a][i])*dl; drift_p+=(frp-flp)*invh2;
