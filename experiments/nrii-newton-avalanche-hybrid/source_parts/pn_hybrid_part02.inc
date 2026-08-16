@@ -1,0 +1,136 @@
+    }
+}
+
+struct NRIIResult { double ms,res; int order; int W; double tail_ratio; };
+
+NRIIResult run_nrii_fixed(long long N,const Params&P,const EqProfile&E,int fixedK){
+    int H=P.local_half; int W=2*H+1; long long center=N/2; long long g0=center-H;
+    int K=fixedK;
+    vector<vector<double>> cn(K+1, vector<double>(W,0.0)), cp(K+1, vector<double>(W,0.0)), cphi(K+1, vector<double>(W,0.0));
+    // C0 = equilibrium + charge-neutral optical pulse
+    for(int t=0;t<W;t++){
+        long long gi=g0+t; double n,p,ph; eq_at(gi,N,P,E,n,p,ph);
+        double x=(double)(gi-center)/P.pulse_sigma_cells;
+        double pulse=P.pulse_amp*exp(-0.5*x*x);
+        cn[0][t]=n+pulse; cp[0][t]=p+pulse; cphi[0][t]=ph;
+    }
+    // C0 perturbation charge is zero, so equilibrium phi remains consistent.
+    double invh2=1.0/(P.dx*P.dx);
+    auto st=chrono::steady_clock::now();
+    int used=K;
+    double last_norm=0,base_norm=0;
+    for(int k=0;k<K;k++){
+        auto &nn=cn[k+1], &pp=cp[k+1];
+        // keep edge coefficients zero; H is chosen much wider than eq/pulse + pmax halo
+        #pragma omp parallel for schedule(static)
+        for(int i=1;i<W-1;i++){
+            double lapn=(cn[k][i+1]-2*cn[k][i]+cn[k][i-1])*invh2;
+            double lapp=(cp[k][i+1]-2*cp[k][i]+cp[k][i-1])*invh2;
+            double drift_n=0.0, drift_p=0.0, recconv=0.0;
+            for(int a=0;a<=k;a++){
+                int b=k-a;
+                // div( n_a grad phi_b ) via face centered product
+                double frn=0.5*(cn[a][i]+cn[a][i+1])*(cphi[b][i+1]-cphi[b][i]);
+                double fln=0.5*(cn[a][i-1]+cn[a][i])*(cphi[b][i]-cphi[b][i-1]);
+                drift_n += (frn-fln)*invh2;
+                double frp=0.5*(cp[a][i]+cp[a][i+1])*(cphi[b][i+1]-cphi[b][i]);
+                double flp=0.5*(cp[a][i-1]+cp[a][i])*(cphi[b][i]-cphi[b][i-1]);
+                drift_p += (frp-flp)*invh2;
+                recconv += cn[a][i]*cp[b][i];
+            }
+            if(k==0) recconv -= 1.0;
+            double Fn=P.Dn*lapn - P.mun*drift_n - P.krec*recconv;
+            double Fp=P.Dp*lapp + P.mup*drift_p - P.krec*recconv;
+            nn[i]=P.dt*Fn;
+            pp[i]=P.dt*Fp;
+        }
+        // phi_{k+1} from p_{k+1}-n_{k+1}, exact global Dirichlet Green evaluated locally
+        vector<double> rho(W);
+        #pragma omp parallel for schedule(static)
+        for(int i=0;i<W;i++) rho[i]=pp[i]-nn[i];
+        poisson_local_from_rho(rho,cphi[k+1],g0,N,P);
+        long double s=0,s0=0;
+        #pragma omp parallel for reduction(+:s,s0)
+        for(int i=0;i<W;i++){
+            s += (long double)nn[i]*nn[i]+(long double)pp[i]*pp[i]+(long double)cphi[k+1][i]*cphi[k+1][i];
+            if(k==0) s0 += (long double)cn[0][i]*cn[0][i]+(long double)cp[0][i]*cp[0][i]+(long double)cphi[0][i]*cphi[0][i];
+        }
+        last_norm=sqrt((double)s);
+        if(k==0) base_norm=sqrt((double)s0);
+        // deterministic coefficient-only stop, not residual driven. Require >=4 and very small relative tail.
+        if(false) { used=k+1; break; }
+    }
+    auto en=chrono::steady_clock::now();
+    double ms=chrono::duration<double,milli>(en-st).count();
+    // candidate sums up to used
+    vector<double> n(W,0),p(W,0),ph(W,0);
+    for(int k=0;k<=used;k++) for(int i=0;i<W;i++){ n[i]+=cn[k][i]; p[i]+=cp[k][i]; ph[i]+=cphi[k][i]; }
+    // Audit implicit residual in local window + Poisson local equation. Edges excluded generously.
+    double maxr=0;
+    for(int i=2;i<W-2;i++){
+        double lapn=(n[i+1]-2*n[i]+n[i-1])*invh2;
+        double lapp=(p[i+1]-2*p[i]+p[i-1])*invh2;
+        double frn=0.5*(n[i]+n[i+1])*(ph[i+1]-ph[i]);
+        double fln=0.5*(n[i-1]+n[i])*(ph[i]-ph[i-1]);
+        double drn=(frn-fln)*invh2;
+        double frp=0.5*(p[i]+p[i+1])*(ph[i+1]-ph[i]);
+        double flp=0.5*(p[i-1]+p[i])*(ph[i]-ph[i-1]);
+        double drp=(frp-flp)*invh2;
+        double rec=P.krec*(n[i]*p[i]-1.0);
+        double Fn=P.Dn*lapn-P.mun*drn-rec;
+        double Fp=P.Dp*lapp+P.mup*drp-rec;
+        double rn=n[i]-cn[0][i]-P.dt*Fn;
+        double rp=p[i]-cp[0][i]-P.dt*Fp;
+        long long gi=g0+i; double C=doping_at_global(gi,N,P);
+        double rph=-P.lambda2*(ph[i+1]-2*ph[i]+ph[i-1])*invh2-(p[i]-n[i]+C);
+        maxr=max({maxr,abs(rn),abs(rp),abs(rph)});
+    }
+    return {ms,maxr,used,W,last_norm/max(base_norm,1.0)};
+}
+
+struct Mat3{ double a[9]; };
+struct Vec3{ double v[3]; };
+static inline Mat3 zeroM(){ Mat3 M{}; return M; }
+static inline Vec3 zeroV(){ Vec3 v{}; return v; }
+
+static inline bool solve3(const Mat3&M,const Vec3&b,Vec3&x){
+    double A[3][4]={{M.a[0],M.a[1],M.a[2],b.v[0]},{M.a[3],M.a[4],M.a[5],b.v[1]},{M.a[6],M.a[7],M.a[8],b.v[2]}};
+    for(int k=0;k<3;k++){
+        int piv=k; for(int r=k+1;r<3;r++) if(abs(A[r][k])>abs(A[piv][k])) piv=r;
+        if(abs(A[piv][k])<1e-18) return false;
+        if(piv!=k) for(int c=k;c<4;c++) swap(A[piv][c],A[k][c]);
+        double q=A[k][k]; for(int c=k;c<4;c++) A[k][c]/=q;
+        for(int r=0;r<3;r++) if(r!=k){ double f=A[r][k]; for(int c=k;c<4;c++) A[r][c]-=f*A[k][c]; }
+    }
+    x.v[0]=A[0][3];x.v[1]=A[1][3];x.v[2]=A[2][3]; return true;
+}
+static inline bool inv3(const Mat3&M,Mat3&I){
+    for(int col=0;col<3;col++){ Vec3 e{}; e.v[col]=1; Vec3 x; if(!solve3(M,e,x))return false; for(int r=0;r<3;r++) I.a[3*r+col]=x.v[r]; } return true;
+}
+static inline Mat3 mulM(const Mat3&A,const Mat3&B){ Mat3 C{}; for(int i=0;i<3;i++)for(int j=0;j<3;j++)for(int k=0;k<3;k++)C.a[3*i+j]+=A.a[3*i+k]*B.a[3*k+j]; return C; }
+static inline Vec3 mulV(const Mat3&A,const Vec3&x){ Vec3 y{}; for(int i=0;i<3;i++)for(int k=0;k<3;k++)y.v[i]+=A.a[3*i+k]*x.v[k]; return y; }
+static inline Mat3 subM(Mat3 A,const Mat3&B){for(int i=0;i<9;i++)A.a[i]-=B.a[i];return A;}
+static inline Vec3 subV(Vec3 a,const Vec3&b){for(int i=0;i<3;i++)a.v[i]-=b.v[i];return a;}
+
+struct NewtonResult { double ms,res; int iters; bool ok; double rss_est_gib; };
+
+NewtonResult run_newton(long long Nll,const Params&P,const EqProfile&E){
+    if(Nll > INT_MAX) return {0,0,0,false,0};
+    int N=(int)Nll; if(N<8) return {0,0,0,false,0};
+    size_t M=(size_t)N-2;
+    double gib=((double)N*5*8.0 + (double)M*(9+3)*8.0)/(1024.0*1024.0*1024.0);
+    vector<double> n,p,ph,on,op;
+    vector<Mat3> Ct;
+    vector<Vec3> dtv;
+    try { n.resize(N);p.resize(N);ph.resize(N);on.resize(N);op.resize(N);Ct.resize(M);dtv.resize(M); }
+    catch(...) { return {0,0,0,false,gib}; }
+    long long cc=Nll/2;
+    #pragma omp parallel for schedule(static)
+    for(int i=0;i<N;i++){
+        double ne,pe,fe; eq_at(i,Nll,P,E,ne,pe,fe);
+        double x=(double)((long long)i-cc)/P.pulse_sigma_cells;
+        double pulse=P.pulse_amp*exp(-0.5*x*x);
+        on[i]=ne+pulse; op[i]=pe+pulse; n[i]=on[i];p[i]=op[i];ph[i]=fe;
+    }
+    // contacts fixed at equilibrium/bulk; state already so.
+    double invh2=1.0/(P.dx*P.dx);
