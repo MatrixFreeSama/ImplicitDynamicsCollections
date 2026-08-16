@@ -28,7 +28,7 @@ The purpose of this branch is not to claim a production CFD solver or a definiti
 2. time to the observed numerical residual floor,
 3. the one-shot order/accuracy cost of NRII,
 4. iteration growth in Newton–Krylov,
-5. implementation overhead introduced by Chebyshev and rational continuation.
+5. implementation overhead introduced by Chebyshev and Padé continuation.
 
 ### Headline equal-time observations
 
@@ -41,7 +41,7 @@ For the one-step floor-seeking experiment:
 
 The observed floor is around \(4.4\times10^{-9}\) in this CPU reference. This is an empirical plateau of this implementation and discretization, **not** a universal machine-precision theorem.
 
-The longer 12-step median benchmark shows a different picture: NRII wins at 256², while Newton is faster at 128², 512², and 1024² in the current CPU implementation. This exposes substantial overhead in the present general Chebyshev/rational machinery and is one reason the branch is explicitly experimental.
+The longer 12-step median benchmark shows a different picture: NRII wins at 256², while Newton is faster at 128², 512², and 1024² in the current CPU implementation. This exposes substantial overhead in the present general Chebyshev/Padé machinery and is one reason the branch is explicitly experimental.
 
 ### Repository layout on this branch
 
@@ -60,7 +60,7 @@ experiments/
 
 ### Important scope boundary
 
-NRII itself is treated here as the coefficient-generation core. Chebyshev and Padé-family rational continuation are auxiliary representation tools, not definitions of NRII. The Newton–Krylov implementation is a comparison baseline.
+NRII itself is treated here as the coefficient-generation core. Chebyshev and Padé continuation are auxiliary representation tools, not definitions of NRII. The Newton–Krylov implementation is a comparison baseline.
 
 No local Windows/CUDA executable, local GPU measurement, or unpublished local-machine result is included in this branch.
 
