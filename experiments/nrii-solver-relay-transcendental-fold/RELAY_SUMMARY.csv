@@ -1,0 +1,11 @@
+metric,value
+relay_total_steps,30
+nrii_krawczyk_newton_steps,28
+pseudo_arclength_steps,2
+terminal_newton_updates_total,25
+pseudo_arclength_corrector_updates_total,4
+closest_x_to_fold,-0.0063589079009560758
+closest_mu_to_fold,-1.0000202607775524
+final_x,1.0276300401633864
+final_mu,-1.3854840962851955
+final_residual,6.6613381477509392e-15
