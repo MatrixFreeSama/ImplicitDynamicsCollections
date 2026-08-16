@@ -4,11 +4,11 @@
 
 This experimental note compares a forward coefficient-construction implicit method, NRII (Non-Residual-Iterative Implicit), with a conventional Newton–Krylov baseline on a two-dimensional bridge-deck wake problem. The comparison is deliberately restricted to a cloud CPU reference implementation. It does not report CUDA performance and does not use measurements from the author's local machine.
 
-The benchmark uses a common discrete state \(\mathbf U=(u,v,p)\), a common matrix-free spatial operator, and a common implicit residual. NRII constructs a finite sequence of time-series coefficients and then applies Chebyshev/rational representation machinery to form a candidate state without a residual-driven correction loop. The baseline uses inexact Newton iterations, analytic matrix-free Jacobian-vector products, restarted GMRES, a Jacobi preconditioner, and Armijo line search.
+The benchmark uses a common discrete state \(\mathbf U=(u,v,p)\), a common matrix-free spatial operator, and a common implicit residual. NRII constructs a finite sequence of time-series coefficients and then applies Chebyshev/Padé representation machinery to form a candidate state without a residual-driven correction loop. The baseline uses inexact Newton iterations, analytic matrix-free Jacobian-vector products, restarted GMRES, a Jacobi preconditioner, and Armijo line search.
 
 Two experiment styles are recorded. A 12-step median benchmark measures end-to-end wall time under a fixed residual gate. A one-step floor-seeking benchmark instead records residual as a function of computational work and wall time. The latter avoids treating a single user-chosen tolerance as the sole definition of performance and makes visible a structural cost of one-shot coefficient methods: once the numerical floor has been reached, additional expansion order produces little or no useful accuracy.
 
-On the cloud CPU reference, NRII reaches the observed \(\sim 4.4\times10^{-9}\) residual plateau substantially earlier than Newton–Krylov at 256² and 512² in the one-step experiment. In the 12-step benchmark, however, the current general Chebyshev/rational implementation is sufficiently expensive that Newton is faster at several grid sizes. These results are therefore evidence about the present reference implementation and experimental metric, not a claim of universal superiority.
+On the cloud CPU reference, NRII reaches the observed \(\sim 4.4\times10^{-9}\) residual plateau substantially earlier than Newton–Krylov at 256² and 512² in the one-step experiment. In the 12-step benchmark, however, the current general Chebyshev/Padé implementation is sufficiently expensive that Newton is faster at several grid sizes. These results are therefore evidence about the present reference implementation and experimental metric, not a claim of universal superiority.
 
 ## 1. Experimental status and provenance
 
@@ -80,7 +80,7 @@ The NRII core is represented conceptually by
 
 The defining property relevant to this experiment is the absence of a residual-driven Newton-style correction loop. For a declared order \(p\), the coefficient sequence is generated forward and used to construct a candidate state.
 
-In the reference code, the declared order also controls the available Chebyshev and rational representation information. The rational denominator degree is component-adaptive within the information supplied by the declared order.
+In the reference code, the declared order also controls the available Chebyshev and Padé representation information. The Padé denominator degree is component-adaptive within the information supplied by the declared order.
 
 ### 3.2 Newton–Krylov baseline
 
@@ -186,7 +186,7 @@ A separate experiment runs 12 implicit steps and compares median wall time under
 
 This benchmark does not show monotonic NRII superiority. In the present CPU implementation, Newton is faster at 128², 512², and 1024². NRII is faster at 256².
 
-The reference code makes a likely implementation cost visible: the general Chebyshev transform scales approximately as \(O(p^2N)\), and the rational identification performs repeated whole-field reductions. These costs grow sharply when the representation order increases.
+The reference code makes a likely implementation cost visible: the general Chebyshev transform scales approximately as \(O(p^2N)\), and the Padé identification performs repeated whole-field reductions. These costs grow sharply when the representation order increases.
 
 The attempted 2048² run did not complete within the 120 s cloud execution window and is not assigned a fabricated result.
 
@@ -219,7 +219,7 @@ The following limitations are essential:
 1. This is a CPU reference, not a GPU benchmark.
 2. The bridge-wake model is a benchmark scene, not a validated full-scale bridge engineering CFD model.
 3. The observed residual floor is implementation- and discretization-dependent.
-4. The present Chebyshev/rational implementation contains substantial overhead and should not be treated as an optimized endpoint.
+4. The present Chebyshev/Padé implementation contains substantial overhead and should not be treated as an optimized endpoint.
 5. The data are too limited to establish asymptotic superiority of either solver family.
 6. No claim is made that NRII dominates Newton–Krylov for arbitrary nonlinear implicit systems.
 7. The cloud source is a research reference and should not be conflated with the separate local Windows/CUDA executable.
@@ -246,6 +246,6 @@ First, the CPU reference implementation can produce NRII candidates whose measur
 
 Second, the residual-versus-time view is more informative for this one-shot method than a single fixed tolerance, because it distinguishes useful additional accuracy from work performed after the numerical floor has already been reached.
 
-Third, the present generalized Chebyshev/rational implementation has enough overhead to reverse the performance ranking in the longer multi-step benchmark at several grid sizes. Removing that implementation overhead is therefore a separate engineering problem from evaluating the NRII coefficient construction itself.
+Third, the present generalized Chebyshev/Padé implementation has enough overhead to reverse the performance ranking in the longer multi-step benchmark at several grid sizes. Removing that implementation overhead is therefore a separate engineering problem from evaluating the NRII coefficient construction itself.
 
 No stronger conclusion is claimed in this experimental branch.
