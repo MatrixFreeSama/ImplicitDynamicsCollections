@@ -1,0 +1,18 @@
+parameter,value,unit_or_note
+L,0.254,m
+AREA,0.000645,m^2
+YOUNG,211000000000,Pa
+RHO,7847,kg/m^3
+V0,5,m/s
+RESTITUTION,0,dimensionless
+CFL_fraction,0.7,dimensionless
+NRII_order,64,coefficient terms
+ImpulseResponseBaton_order,64,coefficient terms
+NRII_residual_role,audit_only,never drives state correction
+contact_formulation,Fischer-Burmeister,exact NCP
+contact_solver,semismooth_Newton,generalized Jacobian
+cpu_backend,Numba JIT + NumPy arrays,cloud benchmark
+cuda_measured,false,no CUDA device exposed by cloud runtime
+wave_speed,5185.485227141945,m/s
+analytical_bounce_time,9.796575975976534e-05,s
+analytical_force_scale,131226.87081205964,N
