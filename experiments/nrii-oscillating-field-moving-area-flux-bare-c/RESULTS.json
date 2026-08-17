@@ -1,0 +1,26 @@
+{
+  "benchmark": "NRII oscillating-field moving-area flux benchmark, bare C17",
+  "status": "literature-grounded combined stress benchmark; not a reproduction of a single published numerical case",
+  "parameters": {"fB_Hz": 40000, "fA_Hz": 37600, "fN_Hz": 39100, "B0_T": 0.001, "A0_m2": 9.9999999999999995e-07, "epsA": 0.14999999999999999, "dt_s": 1e-08, "T_s": 0.01, "NRII_order": 16},
+  "derived_frequencies_Hz": {"relative_rotation": 900, "lower_area_sideband": 36700, "upper_area_sideband": 38500},
+  "metrics": {
+    "steps": 1000000,
+    "elapsed_s": 0.21775800000000001,
+    "steps_per_second": 4592253.7863132469,
+    "max_midpoint_residual_inf": 2.7126738355587321e-16,
+    "max_state_error_vs_closed_form_midpoint_oracle": 9.7295504986050219e-11,
+    "max_state_error_vs_continuous_exact": 0.0013229328321999296,
+    "max_flux_error_vs_continuous_exact_Wb": 1.8503457504928377e-13,
+    "max_emf_error_vs_continuous_exact_V": 3.9506352277406959e-08,
+    "max_area_relative_error_vs_continuous_exact": 0.00016471144227445401,
+    "max_B_vector_error_T": 1.3229331216116665e-06,
+    "max_area_vector_error_m2": 1.4209736827167496e-09,
+    "max_abs_flux_Wb": 1.1499999762748635e-09,
+    "max_abs_emf_V": 3.5885501940476507e-05,
+    "Bx_zero_crossings": 800,
+    "area_deviation_zero_crossings": 752,
+    "flux_zero_crossings": 18,
+    "emf_zero_crossings": 681
+  },
+  "solver_contract": {"state_advance": "fixed-order NRII implicit-midpoint coefficient cascade", "global_matrix_assembly": false, "global_linear_solve": false, "residual_role": "audit only", "oracle": "closed-form 2x2 implicit-midpoint Cayley update for each oscillator block"}
+}
