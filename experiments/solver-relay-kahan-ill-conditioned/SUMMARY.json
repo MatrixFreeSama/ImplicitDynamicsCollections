@@ -1,0 +1,14 @@
+{
+  "benchmark": "Kahan-128 ill-conditioned linear system",
+  "n": 128,
+  "theta": "1.2",
+  "pert": 0,
+  "cond2_mp_estimate": "4.98138450952040788e+21",
+  "sigma_min_mp_estimate": "2.15376252200926298e-21",
+  "double_LU_forward_error": 0.9683867481844036,
+  "double_LU_backward_error": 5.926671732198162e-17,
+  "double_CPQR_reported_rank": 128,
+  "double_SVD_reported_rank": 127,
+  "minimum_residual_dps_meeting_target_after_one_correction": 30,
+  "target_forward_error": 1e-12
+}
