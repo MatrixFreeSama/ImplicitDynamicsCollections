@@ -1,0 +1,106 @@
+{
+  "test_name": "NRII Zero-Hysteresis Buck Sliding Relay",
+  "status": "research benchmark; not production validation",
+  "parameters": {
+    "Vin": 24.0,
+    "L": 0.0001,
+    "C": 0.0001,
+    "R": 4.0,
+    "Iref": 3.0
+  },
+  "primary_case": {
+    "initial": {
+      "i_A": 3.0,
+      "v_V": 10.0,
+      "dt_s": 1e-05
+    },
+    "surface": {
+      "di_on_A_per_s": 140000.0,
+      "di_off_A_per_s": -100000.0,
+      "sliding_condition": true
+    },
+    "nrii_off": {
+      "u": 0,
+      "candidate_i_A": 2.000000000000001,
+      "candidate_v_V": 10.0,
+      "residual_inf": 8.881784197001252e-16,
+      "tail_inf": 1.847067473154819e-51,
+      "max_coeff_inf": 1.0,
+      "order": 40,
+      "domain_valid": false,
+      "direct_verifier_max_abs_error": 8.881784197001252e-16
+    },
+    "nrii_on": {
+      "u": 1,
+      "candidate_i_A": 4.394088669950738,
+      "candidate_v_V": 10.118226600985222,
+      "residual_inf": 7.771561172376096e-16,
+      "tail_inf": 2.547504044858996e-51,
+      "max_coeff_inf": 1.4000000000000001,
+      "order": 40,
+      "domain_valid": false,
+      "direct_verifier_max_abs_error": 0.0
+    },
+    "no_binary_root_certificate": {
+      "certified": true,
+      "reason": "Both unique affine branch roots violate their own switching inequalities."
+    },
+    "strict_binary_newton": {
+      "converged": false,
+      "cycle": {
+        "first_seen": 1,
+        "repeat_at": 3,
+        "period": 2
+      },
+      "final_residual_inf": 24.0,
+      "history": [
+        {"iteration": 0, "i_A": 3.0, "v_V": 10.0, "active_u": 1, "residual_inf": 14.0},
+        {"iteration": 1, "i_A": 4.394088669950738, "v_V": 10.118226600985222, "active_u": 0, "residual_inf": 23.999999999999996},
+        {"iteration": 2, "i_A": 2.0, "v_V": 10.0, "active_u": 1, "residual_inf": 24.0},
+        {"iteration": 3, "i_A": 4.394088669950738, "v_V": 10.118226600985222, "active_u": 0, "residual_inf": 23.999999999999996}
+      ]
+    },
+    "projected_semismooth_relay": {
+      "converged": true,
+      "mode": "SLIDING",
+      "i_A": 3.0,
+      "v_V": 10.049382716049383,
+      "duty": 0.41769547325102885,
+      "residual_inf": 2.220446049250313e-15,
+      "newton_updates": 1
+    },
+    "closed_form_sliding_verifier": {
+      "valid": true,
+      "i_A": 3.0,
+      "v_V": 10.049382716049383,
+      "duty": 0.4176954732510288,
+      "relay_max_abs_error": 5.551115123125783e-17
+    }
+  },
+  "dt_sweep": [
+    {"dt_s": 1e-07, "off_i_A": 2.989999752530996, "off_domain_valid": false, "on_i_A": 3.0139997465317467, "on_domain_valid": false, "newton_converged": false, "newton_cycle_period": 2, "relay_converged": true, "relay_mode": "SLIDING", "relay_duty": 0.41667708203141274, "relay_i_A": 3.0, "relay_v_V": 10.000499937507811, "relay_residual_inf": 1.1363132657038477e-13, "relay_updates": 1, "nrii_max_residual_inf": 1.639747365667077e-15},
+    {"dt_s": 3e-07, "off_i_A": 2.969997818323038, "off_domain_valid": false, "on_i_A": 3.041997656384129, "on_domain_valid": false, "newton_converged": false, "newton_cycle_period": 2, "relay_converged": true, "relay_mode": "SLIDING", "relay_duty": 0.4166979049523095, "relay_i_A": 3.0, "relay_v_V": 10.001499437710859, "relay_residual_inf": 5.290212712338871e-14, "relay_updates": 1, "nrii_max_residual_inf": 8.875278983966339e-16},
+    {"dt_s": 1e-06, "off_i_A": 2.89997752865097, "off_domain_valid": false, "on_i_A": 3.1399715362912284, "on_domain_valid": false, "newton_converged": false, "newton_cycle_period": 2, "relay_converged": true, "relay_mode": "SLIDING", "relay_duty": 0.4167707032875573, "relay_i_A": 3.0, "relay_v_V": 10.004993757802746, "relay_residual_inf": 8.787415239908114e-14, "relay_updates": 1, "nrii_max_residual_inf": 1.6210990883003262e-15},
+    {"dt_s": 3e-06, "off_i_A": 2.699843123583755, "off_domain_valid": false, "on_i_A": 3.419681764984188, "on_domain_valid": false, "newton_converged": false, "newton_cycle_period": 2, "relay_converged": true, "relay_mode": "SLIDING", "relay_duty": 0.41697799916977996, "relay_i_A": 3.0, "relay_v_V": 10.01494396014944, "relay_residual_inf": 1.8318679906315083e-15, "relay_updates": 1, "nrii_max_residual_inf": 1.897787482718627e-15},
+    {"dt_s": 1e-05, "off_i_A": 2.000000000000001, "off_domain_valid": false, "on_i_A": 4.394088669950738, "on_domain_valid": false, "newton_converged": false, "newton_cycle_period": 2, "relay_converged": true, "relay_mode": "SLIDING", "relay_duty": 0.41769547325102885, "relay_i_A": 3.0, "relay_v_V": 10.049382716049383, "relay_residual_inf": 2.220446049250313e-15, "relay_updates": 1, "nrii_max_residual_inf": 8.881784197001252e-16},
+    {"dt_s": 3e-05, "off_i_A": 0.04245283018867925, "off_domain_valid": false, "on_i_A": 7.089622641509433, "on_domain_valid": false, "newton_converged": false, "newton_cycle_period": 2, "relay_converged": true, "relay_mode": "SLIDING", "relay_duty": 0.41967871485943764, "relay_i_A": 2.999999999999999, "relay_v_V": 10.144578313253012, "relay_residual_inf": 8.881784197001252e-16, "relay_updates": 1, "nrii_max_residual_inf": 3.1086244689504383e-15},
+    {"dt_s": 5e-05, "off_i_A": -1.7777777777777781, "off_domain_valid": false, "on_i_A": 9.555555555555555, "on_domain_valid": false, "newton_converged": false, "newton_cycle_period": 2, "relay_converged": true, "relay_mode": "SLIDING", "relay_duty": 0.42156862745098045, "relay_i_A": 3.0000000000000004, "relay_v_V": 10.23529411764706, "relay_residual_inf": 1.7763568394002505e-15, "relay_updates": 1, "nrii_max_residual_inf": 2.886579864025407e-15}
+  ],
+  "voltage_sweep": [
+    {"v0_V": -1.0, "di_on_A_per_s": 250000.0, "di_off_A_per_s": 10000.0, "surface_sliding_condition": false, "relay_converged": true, "relay_mode": "OFF", "relay_i_A": 3.083743842364532, "relay_v_V": -0.6748768472906405, "relay_duty": 0.0, "relay_residual_inf": 8.881784197001252e-16},
+    {"v0_V": 2.0, "di_on_A_per_s": 220000.0, "di_off_A_per_s": -20000.0, "surface_sliding_condition": true, "relay_converged": true, "relay_mode": "SLIDING", "relay_i_A": 3.0, "relay_v_V": 2.246913580246914, "relay_duty": 0.08847736625514402, "relay_residual_inf": 2.220446049250313e-15},
+    {"v0_V": 10.0, "di_on_A_per_s": 140000.0, "di_off_A_per_s": -100000.0, "surface_sliding_condition": true, "relay_converged": true, "relay_mode": "SLIDING", "relay_i_A": 3.0, "relay_v_V": 10.049382716049383, "relay_duty": 0.41769547325102885, "relay_residual_inf": 2.220446049250313e-15},
+    {"v0_V": 12.0, "di_on_A_per_s": 120000.0, "di_off_A_per_s": -120000.0, "surface_sliding_condition": true, "relay_converged": true, "relay_mode": "SLIDING", "relay_i_A": 3.0, "relay_v_V": 12.0, "relay_duty": 0.5, "relay_residual_inf": 0.0},
+    {"v0_V": 14.0, "di_on_A_per_s": 100000.0, "di_off_A_per_s": -140000.0, "surface_sliding_condition": true, "relay_converged": true, "relay_mode": "SLIDING", "relay_i_A": 3.0, "relay_v_V": 13.950617283950617, "relay_duty": 0.5823045267489713, "relay_residual_inf": 2.220446049250313e-15},
+    {"v0_V": 23.0, "di_on_A_per_s": 10000.0, "di_off_A_per_s": -230000.0, "surface_sliding_condition": true, "relay_converged": true, "relay_mode": "SLIDING", "relay_i_A": 3.0, "relay_v_V": 22.728395061728396, "relay_duty": 0.9526748971193416, "relay_residual_inf": 5.329070518200751e-15},
+    {"v0_V": 25.0, "di_on_A_per_s": -10000.0, "di_off_A_per_s": -250000.0, "surface_sliding_condition": false, "relay_converged": true, "relay_mode": "ON", "relay_i_A": 2.916256157635468, "relay_v_V": 24.67487684729064, "relay_duty": 1.0, "relay_residual_inf": 1.7763568394002505e-15}
+  ],
+  "hysteresis_limit": [
+    {"half_band_A": 0.1, "estimated_switching_Hz_at_v10": 291666.6666666667},
+    {"half_band_A": 0.01, "estimated_switching_Hz_at_v10": 2916666.666666667},
+    {"half_band_A": 0.001, "estimated_switching_Hz_at_v10": 29166666.666666668},
+    {"half_band_A": 0.0001, "estimated_switching_Hz_at_v10": 291666666.6666666},
+    {"half_band_A": 1e-05, "estimated_switching_Hz_at_v10": 2916666666.666666},
+    {"half_band_A": 1e-06, "estimated_switching_Hz_at_v10": 29166666666.666668}
+  ]
+}
