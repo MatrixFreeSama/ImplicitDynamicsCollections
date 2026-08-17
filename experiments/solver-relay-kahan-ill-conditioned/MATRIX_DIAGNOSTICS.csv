@@ -1,0 +1,13 @@
+quantity,value
+n,128
+theta,1.2
+pert,0
+sigma_max_mp_power,10.7287192643225491381414394219
+sigma_min_mp_inverse_power,2.1537625220092629757171365058e-21
+cond2_mp_estimate,4981384509520407883851.19459351
+cpqr_min_abs_Rdiag,0.00013126045726849763
+cpqr_rank_tol,2.842170943040401e-14
+cpqr_reported_rank,128
+svd_reported_rank,127
+svd_smallest_sigma_double,5.792115083918513e-19
+cpqr_Rdiag_to_sigma_min_mp_ratio,60944721587059495.1200588394417
