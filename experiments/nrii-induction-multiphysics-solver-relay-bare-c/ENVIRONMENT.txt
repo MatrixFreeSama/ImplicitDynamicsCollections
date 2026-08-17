@@ -1,0 +1,10 @@
+gcc (Debian 14.2.0-19) 14.2.0
+Linux 8bd33c8982d1 6.18.35 #1 SMP Mon Jul 27 18:07:50 UTC 2026 x86_64 GNU/Linux
+Architecture:                            x86_64
+CPU(s):                                  5
+On-line CPU(s) list:                     0-4
+Model name:                              AMD EPYC 9V74 80-Core Processor
+Thread(s) per core:                      1
+Core(s) per socket:                      5
+Socket(s):                               1
+NUMA node0 CPU(s):                       0-4
