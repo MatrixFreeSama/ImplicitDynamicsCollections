@@ -2,7 +2,7 @@
 
 This branch tests a general solver-handoff architecture rather than requiring one solver to finish every stage alone.
 
-## Hard test equation
+## Test equation
 
 We use the scalar transcendental family
 
@@ -27,7 +27,7 @@ C1=-mu-E0-C0,
 E_n=-(1/n) sum_{k=1}^n k C_k E_{n-k},
 C_{n+1}=-E_n.
 
-No residual-to-Jacobian-to-correction loop is inserted into NRII. Fixed declared orders 8, 12, 16 are evaluated with Pade continuation. Their spread constructs a candidate interval baton. Residual is not used to increase NRII order.
+No residual-to-Jacobian-to-correction loop is inserted into NRII. Fixed declared orders 8, 12, 16 are evaluated with Pade continuation. Their spread constructs candidate interval handoff data. Residual is not used to increase NRII order.
 
 If the NRII interval passes a scalar numerical Krawczyk inclusion gate, its center is handed to damped Newton for terminal convergence. The corrected root is fed back as the next NRII anchor.
 
@@ -61,17 +61,17 @@ Naive Newton parameter continuation replaying the relay's mu schedule also remai
 
 At the exact double root mu=-1, Newton requires 24 updates to reach about 3.55e-15, illustrating loss of ordinary quadratic convergence.
 
-A direct NRII baton from the original negative anchor at the final parameter also remains on the negative branch. NRII is not branch-omniscient; branch identity must be preserved by the relay.
+A direct NRII handoff state from the original negative anchor at the final parameter also remains on the negative branch. NRII is not branch-omniscient; branch identity must be preserved by the relay.
 
 A Krawczyk box centered on the exact double root cannot satisfy a unique-root inclusion condition because the derivative vanishes there.
 
-Pure pseudo-arclength is a strong specialist control and crosses the fold by itself. This experiment does not claim that the relay is faster or universally superior to pseudo-arclength. Its purpose is to demonstrate automatic solver-role handoff with a common information baton.
+Pure pseudo-arclength is a strong specialist control and crosses the fold by itself. This experiment does not claim that the relay is faster or universally superior to pseudo-arclength. Its purpose is to demonstrate automatic solver-role handoff with a common structured interface.
 
 ## Interpretation
 
 Solver A does not have to produce the final answer. It can produce the information Solver B is missing.
 
-The baton can carry a state, interval/domain, branch identity, tangent, local model, approximate inverse, search subspace, or certificate status. The scheduler chooses the next specialist and can feed accepted results back into NRII.
+The handoff data can carry a state, interval or domain, branch identity, tangent, local model, approximate inverse, search subspace, or verification status. The scheduler chooses the next specialist and can feed accepted results back into NRII.
 
 This experiment does not establish a universal solver, infinite continuation, or a theorem that NRII always finds the correct branch. True branch termination, nonexistence, an unavoidable singularity, or failure of every available handoff still terminates the relay.
 
