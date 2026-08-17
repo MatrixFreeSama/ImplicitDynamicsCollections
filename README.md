@@ -153,8 +153,9 @@ The current experimental branches explore different parts of this interface conc
 - `experiment/nrii-semismooth-published-impacting-bar-relay` studies smooth NRII bulk evolution and semismooth unilateral-contact resolution on a published-parameter elastic-bar impact adaptation.
 - `experiment/nrii-zero-hysteresis-buck-sliding-relay` studies smooth fixed-switch NRII branches and projected semismooth resolution of a zero-hysteresis electrical sliding singularity.
 - `experiment/nrii-constrained-dynamics-singular-kkt-bare-c` studies a bare-C17 dense constrained multibody adaptation in which a full-rank Newton/KKT continuation contract loses numerical rank at a three-link manipulator singular configuration while a Matrix-Free NRII implicit-midpoint path continues the same independently verified smooth discrete state; a pseudoinverse specialist is retained as a singularity-aware control.
+- `experiment/nrii-oscillating-field-moving-area-flux-bare-c` studies a bare-C17 combined electromagnetic/moving-surface stress benchmark in which a time-periodic magnetic-field vector, a rotating surface normal, and a periodically changing area generate analytically predictable carrier and sideband flux components; fixed-order Matrix-Free NRII reproduces the implicit-midpoint trajectory and Faraday-voltage spectrum without a global matrix solve.
 
-These experiments support the architectural motivation for structured solver handoff and solver relay graphs, but they should not be read as evidence that USRI or UISRI dominates every standalone solver or every established continuation, interval, mixed-precision, projection, null-space, pseudoinverse, regularized, or high-precision method.
+These experiments support the architectural motivation for structured solver handoff and solver relay graphs, but they should not be read as evidence that USRI or UISRI dominates every standalone solver or every established continuation, interval, mixed-precision, projection, null-space, pseudoinverse, regularized, electromagnetic, structural-dynamics, or high-precision method.
 
 ## Experimental status
 
