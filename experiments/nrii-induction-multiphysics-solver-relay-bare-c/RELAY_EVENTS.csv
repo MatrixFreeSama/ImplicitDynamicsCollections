@@ -1,0 +1,7 @@
+case,producer_status,handoff_to,count,consumer_status,interpretation
+weak-coupling,no_failure,none,0,not_needed,control case completes without solver handoff
+skin-effect-contrast,GMRES_iteration_budget_exhausted,BiCGSTAB,1,accepted,electromagnetic Krylov fallback
+strong-convection,Picard_nonlinear_iteration_failed,Newton-Krylov,10,accepted,nonlinear convective-flow fallback
+phase-boundary,ordinary_Newton_derivative_contract_undefined,semismooth_active_set,17,accepted,phase-change nonsmooth fallback
+strong-global-coupling,fixed_point_operational_budget_exhausted,Aitken,1,not_accepted_within_budget,outer coupling escalation
+strong-global-coupling,Aitken_operational_budget_exhausted,Anderson,1,accepted,outer coupling terminal acceleration
