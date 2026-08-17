@@ -1,0 +1,6 @@
+Bare-C multiphysics solver-relay benchmark, grid 48x64 (3072 cells)
+weak-coupling          success=1 outer=fixed-point it=11 res=1.562e-05 | EM=GMRES    flow=Picard        thermal=ordinary-Newton       | Tmean=0.4980 Tmax=0.6140 liq=0.001 handoffs=0
+skin-effect-contrast   success=1 outer=fixed-point it=11 res=1.994e-05 | EM=GMRES    flow=Picard        thermal=ordinary-Newton       | Tmean=0.4951 Tmax=0.6213 liq=0.002 handoffs=1
+strong-convection      success=1 outer=fixed-point it=11 res=1.301e-05 | EM=GMRES    flow=Newton-Krylov thermal=ordinary-Newton       | Tmean=0.4972 Tmax=0.6249 liq=0.003 handoffs=10
+phase-boundary         success=1 outer=fixed-point it=17 res=1.610e-05 | EM=GMRES    flow=Picard        thermal=semismooth-active-set | Tmean=0.4962 Tmax=0.6005 liq=0.000 handoffs=17
+strong-global-coupling success=1 outer=Anderson   it= 6 res=1.424e-05 | EM=GMRES    flow=Picard        thermal=ordinary-Newton       | Tmean=0.4992 Tmax=0.6181 liq=0.005 handoffs=2
