@@ -1,0 +1,14 @@
+parameter,value
+seed,20260817
+physical_joint_coordinates,3
+lifted_generalized_coordinates,24
+auxiliary_coordinates,21
+constraints,10
+dense_KKT_dimension,34
+dt_s,0.0025000000000000001
+singular_step,200
+singular_time_s,0.5
+target_steps,400
+target_time_s,1
+NRII_order,16
+implementation,bare_C17_no_external_numeric_library
