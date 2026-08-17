@@ -135,10 +135,11 @@ Not supported:
 - that every physically singular dynamics problem has a uniquely continuable state;
 - that NRII universally resolves rank loss.
 
-## Files
+## Versioned files
 
 - `nrii_constrained_dynamics_singular_kkt_continuation.c`: complete C17 reproducer
 - `RESULTS.json`: aggregate result and singular snapshot
 - `SINGULARITY_SWEEP.csv`: conditioning/rank sweep
-- `CONTINUATION_TRACE.csv`: all 400 time steps
 - `MODEL_PARAMETERS.csv`: locked parameters
+
+Running the reproducer also generates `CONTINUATION_TRACE.csv` containing all 400 time steps. The recorded trace is included in the downloadable benchmark bundle accompanying this run rather than duplicated in the Git branch.
