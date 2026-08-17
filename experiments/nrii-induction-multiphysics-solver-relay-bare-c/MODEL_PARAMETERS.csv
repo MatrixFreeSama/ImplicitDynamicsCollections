@@ -1,0 +1,22 @@
+parameter,value,notes
+grid_nx,48,reduced 2D axisymmetric-like cross-section
+grid_ny,64,reduced 2D axisymmetric-like cross-section
+cells,3072,NX*NY
+thermal_dt_default,0.06,dimensionless implicit coupling step
+thermal_dt_phase,0.035,phase-boundary case
+thermal_dt_global,0.045,strong-global-coupling case
+nrii_order,64,scalar RL coil implicit-midpoint construction
+gmres_restart,20,electromagnetic primary linear solver
+gmres_max_iterations,340,electromagnetic primary operational budget
+bicgstab_max_iterations,400,electromagnetic fallback
+picard_max_iterations,18,nonlinear flow primary
+newton_krylov_max_iterations,12,nonlinear flow fallback
+thermal_newton_max_iterations,18,thermal primary
+anderson_history,3,outer coupling fallback
+outer_tolerance,2e-5,relative coupling tolerance
+fixed_point_budget_normal,24,outer coupling
+fixed_point_budget_strong_global,5,declared operational budget in global stress case
+aitken_budget_normal,28,outer coupling
+aitken_budget_strong_global,3,declared operational budget in global stress case
+anderson_budget,32,outer coupling terminal fallback
+solidus,0.60,dimensionless
