@@ -1,0 +1,10 @@
+{
+  "benchmark": "Bare-C Reduced Thermo-Electromagneto-Hydrodynamic Solver Relay",
+  "grid": [48,64],
+  "cells": 3072,
+  "cases": 5,
+  "all_cases_completed": true,
+  "grand_handoffs": 30,
+  "solver_families": ["NRII","GMRES","BiCGSTAB","Picard","Newton-Krylov","ordinary Newton","semismooth active-set","fixed-point coupling","Aitken relaxation","Anderson acceleration"],
+  "claim_scope": "literature-grounded reduced multiphysics stress benchmark; not a bitwise reproduction of the cited induction-furnace paper"
+}
