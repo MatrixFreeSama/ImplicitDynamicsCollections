@@ -6,44 +6,44 @@ NRII (Non-Residual-Iterative Implicit) was originally conceived as a direct, gen
 
 In that original design, the primary objective was to construct useful equation information directly. Convergence of the immediately emitted expression as a standalone final solution was not a required design target. The construction could instead be consumed by a downstream solver.
 
-The implicit-dynamics work in this repository is a later application of the same coefficient-closure idea. Accordingly, experiments may study NRII in more than one role: as a standalone implicit construction, as a branch/trajectory information generator, or as a producer of structured input for another solver such as Newton.
+The implicit-dynamics work in this repository is a later application of the same coefficient-closure idea. Accordingly, experiments may study NRII in more than one role: as a standalone implicit construction, as a branch or trajectory information generator, or as a producer of structured input for another solver such as Newton.
 
 ## Universal Solver Relay Interface (USRI)
 
-The **Universal Solver Relay Interface (USRI)** is an interface-level architecture for composing heterogeneous numerical solvers without requiring their internal update laws, convergence philosophies, numerical representations, precision models, or implementation strategies to be unified.
+The **Universal Solver Relay Interface (USRI)** is an interface-level architecture for composing heterogeneous numerical solvers without requiring their internal update laws, convergence criteria, numerical representations, precision models, or implementation strategies to be unified.
 
-A solver participating in USRI does not need to produce the final solution. It may instead produce structured information that another solver can consume more effectively. Such transferable information is called a **Solver Baton**.
+A solver participating in USRI does not need to produce the final solution. It may instead produce structured solver-handoff data that another solver can consume.
 
 A relay is written abstractly as
 
 \[
-S_i \xrightarrow{\mathcal{B}_{i\rightarrow j}} S_j,
+S_i \xrightarrow{\mathcal{H}_{i\rightarrow j}} S_j,
 \]
 
-where \(S_i\) and \(S_j\) are independently defined solver cores and \(\mathcal{B}_{i\rightarrow j}\) is the Solver Baton produced by \(S_i\) and consumed by \(S_j\).
+where \(S_i\) and \(S_j\) are independently defined solver cores and \(\mathcal{H}_{i\rightarrow j}\) is the structured handoff data produced by \(S_i\) and consumed by \(S_j\).
 
 The defining principle is:
 
 > **Solver compatibility is determined by transferable information at solver boundaries, not by similarity of internal update laws.**
 
-USRI is therefore intended to support heterogeneous solver composition without solver homogenization. A residual-driven solver, a non-residual constructive solver, an interval method, a continuation method, a factorization-based method, a matrix-free method, or a mixed-precision module may remain internally unchanged while participating through a common relay contract.
+USRI is intended to support heterogeneous solver composition without solver homogenization. A residual-driven solver, a non-residual constructive solver, an interval method, a continuation method, a factorization-based method, a matrix-free method, or a mixed-precision module may remain internally unchanged while participating through a declared handoff contract.
 
-### Solver Baton
+### Solver-handoff data
 
-A **Solver Baton** is a structured information package passed between solver cores. It is not restricted to a candidate solution vector. Depending on the producer and consumer, a Baton may contain one or more of the following:
+Solver-handoff data is a structured information package passed between solver cores. It is not restricted to a candidate solution vector. Depending on the producer and consumer, it may contain one or more of the following:
 
-- **State Baton**: a candidate state, corrected state, anchor, or initial point.
-- **Domain Baton**: an interval, trust region, candidate box, admissible neighborhood, or convergence region.
-- **Branch Baton**: branch identity, ancestry, mode identity, or other information needed to preserve solution selection.
-- **Direction Baton**: tangent, continuation direction, descent direction, local trajectory direction, or other directional information.
-- **Geometry Baton**: Jacobian information, approximate inverse, local metric, curvature information, or other local geometric structure.
-- **Subspace Baton**: Krylov space, coarse space, low-rank space, null-space estimate, or other reusable search subspace.
-- **Factorization Baton**: an LU, QR, RRQR, preconditioner, or other reusable decomposition or operator structure.
-- **Residual Baton**: a residual or defect evaluated by a solver or precision regime better suited to producing it.
-- **Precision Baton**: precision requirements, error budgets, conditioning estimates, or information about which numerical components require increased precision.
-- **Certificate Baton**: interval inclusion information, uniqueness information, admissibility gates, or other numerical or rigorous certificates.
+- **State data**: candidate state, corrected state, anchor, or initial point.
+- **Domain data**: interval, trust region, candidate box, admissible neighborhood, or convergence region.
+- **Branch data**: branch identity, ancestry, mode identity, or other information required to preserve solution selection.
+- **Direction data**: tangent, continuation direction, descent direction, local trajectory direction, or other directional information.
+- **Local-geometry data**: Jacobian information, approximate inverse, local metric, curvature information, or other local geometric structure.
+- **Subspace data**: Krylov space, coarse space, low-rank space, null-space estimate, or other reusable search subspace.
+- **Factorization data**: LU, QR, RRQR, preconditioner, or other reusable decomposition or operator structure.
+- **Residual data**: residual or defect evaluated by a solver or precision regime better suited to producing it.
+- **Precision data**: precision requirements, error budgets, conditioning estimates, or information about which numerical components require increased precision.
+- **Verification data**: interval inclusion information, uniqueness information, admissibility conditions, forward/backward error information, or other numerical or rigorous verification results.
 
-A Baton may be extended with additional fields when a solver pair requires information not covered by the categories above. USRI defines the handoff concept rather than a closed list of solver-specific payloads.
+The handoff schema may be extended when a solver pair requires information not covered by these categories. USRI defines the interface principle rather than a closed list of solver-specific payloads.
 
 ### Relay modes
 
@@ -71,7 +71,7 @@ The output of the second solver becomes a new anchor or information source for t
 S_A \rightarrow S_B \rightarrow S_A \rightarrow S_B \rightarrow \cdots.
 \]
 
-The solver pair repeatedly hands information back and forth while each solver retains its native update rule.
+The solver pair repeatedly exchanges information while each solver retains its native update rule.
 
 **Multi-solver relay graph**
 
@@ -79,23 +79,23 @@ The solver pair repeatedly hands information back and forth while each solver re
 S_1 \rightarrow S_2 \rightarrow \cdots \rightarrow S_n,
 \]
 
-or, more generally, a directed graph in which a scheduler selects the next solver according to the currently available Baton and the information still missing from the problem state.
+or, more generally, a directed graph in which a scheduler selects the next solver according to the currently available handoff data and the information still required by the problem state.
 
 ### Interface-level hybridization
 
 USRI treats hybridization as an interface problem rather than a requirement to derive a single blended update formula.
 
-Two solvers may therefore be mathematically unrelated, internally incompatible, or based on opposing numerical philosophies and still cooperate if one can produce information the other can consume. Their native solver cores remain independently optimizable and independently testable.
+Two solvers may be mathematically unrelated, internally incompatible, or based on different numerical formulations and still cooperate if one can produce information the other can consume. Their native solver cores remain independently optimizable and independently testable.
 
-This is referred to in this repository as **interface-level solver hybridization** or **non-invasive solver hybridization**.
+This repository refers to this as **interface-level solver hybridization** or **non-invasive solver hybridization**.
 
-The intended advantage is not that handoff has zero cost. Relay scheduling, representation conversion, certification, precision escalation, and Baton construction may all introduce overhead. The intended advantage is that these costs occur at the interface without requiring the internal strengths of participating solvers to be diluted into a single homogenized method.
+The intended advantage is not that handoff has zero cost. Relay scheduling, representation conversion, verification, precision escalation, and handoff-data construction may all introduce overhead. The intended advantage is that these costs occur at the interface without requiring the internal algorithms to be merged into a single homogenized method.
 
 ## Universal Implicit Solver Relay Interface (UISRI)
 
 The **Universal Implicit Solver Relay Interface (UISRI)** is the implicit-solver specialization of USRI.
 
-UISRI permits implicit solvers with unrelated or even mutually incompatible internal formulations to cooperate through Solver Batons while preserving the native mathematical authority of each solver core.
+UISRI permits implicit solvers with unrelated or mutually incompatible internal formulations to cooperate through structured handoff data while preserving the mathematical contract of each solver core.
 
 Typical UISRI handoffs include:
 
@@ -122,7 +122,7 @@ These expressions describe information handoff, not a redefinition of the intern
 
 ## Relationship between NRII, UISRI, and USRI
 
-NRII is not defined as the universal interface itself. It is one possible **Baton Producer** and, in some experiments, one possible solver core inside UISRI.
+NRII is not defined as the universal interface itself. It is one possible producer of solver-handoff data and, in some experiments, one possible solver core inside UISRI.
 
 The relationship is therefore
 
@@ -132,13 +132,13 @@ The relationship is therefore
 
 with NRII participating in UISRI when its constructed coefficient, trajectory, branch, state, domain, or related information is handed to another implicit solver.
 
-The broader USRI abstraction is intentionally independent of NRII. For example, a factorization-based solver may hand a low-precision solution and reusable factorization to a high-precision residual module, which then returns a Residual Baton for correction by the original factorization. This remains a USRI relay even though NRII is not involved.
+The broader USRI abstraction is intentionally independent of NRII. For example, a factorization-based solver may hand a low-precision solution and reusable factorization to a high-precision residual module, which then returns a more accurate residual for correction by the original factorization. This remains a USRI relay even though NRII is not involved.
 
 ## Scope of the word "Universal"
 
 "Universal" refers to the **scope of the interface architecture**, not to a theorem that every pair of numerical solvers is mathematically compatible.
 
-A solver can participate when a meaningful producer-consumer relation can be defined between its outputs and another solver's inputs. Some solver pairs may have no useful Baton, and some problems may terminate a relay because of singularity, discontinuity, branch termination, nonexistence of a valid domain, loss of numerical meaning, or other mathematical obstructions.
+A solver can participate when a meaningful producer-consumer relation can be defined between its outputs and another solver's inputs. Some solver pairs may have no useful handoff relation, and some problems may terminate a relay because of singularity, discontinuity, branch termination, nonexistence of a valid domain, loss of numerical meaning, or other mathematical obstructions.
 
 USRI and UISRI therefore make no claim that relay composition guarantees convergence, uniqueness, correctness, or improved performance for arbitrary problems.
 
@@ -146,13 +146,15 @@ USRI and UISRI therefore make no claim that relay composition guarantees converg
 
 The current experimental branches explore different parts of this interface concept rather than constituting a universal proof.
 
-- `experiment/nrii-newton-avalanche-hybrid` studies NRII as a branch-aware seed producer for Newton.
-- `experiment/nrii-newton-alternating-continuation` studies reciprocal and alternating NRII/Newton handoff in a nonlinear avalanche model.
+- `experiment/nrii-newton-avalanche-hybrid` studies NRII as a branch-aware seed producer for Newton in a PN drift-diffusion-Poisson impact-ionization model.
+- `experiment/nrii-newton-alternating-continuation` studies reciprocal and alternating NRII/Newton handoff in the same nonlinear impact-ionization model.
 - `experiment/nrii-solver-relay-transcendental-fold` studies state, domain, branch, direction, Krawczyk, Newton, and pseudo-arclength handoff across a transcendental fold.
-- `experiment/solver-relay-kahan-black` studies a non-NRII relay in which reusable factorization and higher-precision residual information are handed between numerical modules on a severely ill-conditioned Kahan system.
+- `experiment/solver-relay-kahan-ill-conditioned` studies a non-NRII relay in which reusable factorization and higher-precision residual information are transferred between numerical modules on a severely ill-conditioned Kahan system.
+- `experiment/nrii-semismooth-published-impacting-bar-relay` studies smooth NRII bulk evolution and semismooth unilateral-contact resolution on a published-parameter elastic-bar impact adaptation.
+- `experiment/nrii-zero-hysteresis-buck-sliding-relay` studies smooth fixed-switch NRII branches and projected semismooth resolution of a zero-hysteresis electrical sliding singularity.
 
-These experiments support the architectural motivation for Solver Batons and solver relay graphs, but they should not be read as evidence that USRI or UISRI dominates every standalone solver or every established continuation, interval, mixed-precision, or high-precision method.
+These experiments support the architectural motivation for structured solver handoff and solver relay graphs, but they should not be read as evidence that USRI or UISRI dominates every standalone solver or every established continuation, interval, mixed-precision, or high-precision method.
 
 ## Experimental status
 
-Experiment branches are exploratory and should not be read as universal performance or convergence claims. Each branch records its own model, numerical contract, validation gates, comparison conditions, and known limitations.
+Experiment branches are exploratory and should not be read as universal performance or convergence claims. Each branch records its own model, numerical contract, validation conditions, comparison conditions, and known limitations.
