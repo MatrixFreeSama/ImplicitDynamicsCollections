@@ -1,0 +1,6 @@
+case,beta_sigma,em_coupling,lorentz_gain,buoy_gain,conv_gain,thermal_feedback,phase_width,latent,outer_coupling,force_phase_corner
+weak-coupling,0.6,0.10,0.03,0.04,0.08,0.08,0.10,0.55,0.15,0
+skin-effect-contrast,18.0,0.25,0.08,0.08,0.20,0.35,0.10,0.70,0.45,0
+strong-convection,2.0,0.22,0.12,0.15,1.60,0.18,0.10,0.80,0.55,0
+phase-boundary,1.2,0.18,0.05,0.06,0.25,0.15,0.025,1.80,0.50,1
+strong-global-coupling,1.2,0.14,0.04,0.05,0.25,0.45,0.05,1.20,1.80,0
