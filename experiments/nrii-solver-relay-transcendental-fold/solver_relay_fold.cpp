@@ -81,8 +81,8 @@ static PadeResult nrii_pade(double anchor,double mu,int order,double theta=1.0){
     return {true,val,den};
 }
 
-struct Baton{ bool ok=false; double center=0,radius=0,min_den=0; };
-static Baton make_baton(double anchor,double mu){
+struct HandoffInterval{ bool ok=false; double center=0,radius=0,min_den=0; };
+static HandoffInterval make_handoff_interval(double anchor,double mu){
     const int orders[3]={8,12,16}; std::vector<double> vals; double mind=1e300;
     for(int p:orders){ auto r=nrii_pade(anchor,mu,p); if(r.ok && std::abs(r.den)>1e-10){ vals.push_back(r.value); mind=std::min(mind,std::abs(r.den)); } }
     if(vals.size()<2) return {};
@@ -129,10 +129,10 @@ int main(int argc,char**argv){
     while(x<1.0-1e-9 && step<100){
         double x0=x,mu0=mu, mup=mu+ds*tmu; bool used=false;
         if(mup < -1.0005){
-            Baton bt=make_baton(x,mup);
-            if(bt.ok){ Kraw kr=krawczyk(bt.center,bt.radius,mup); if(kr.ok){ auto nr=newton_fixed(bt.center,mup); if(nr.ok){
+            HandoffInterval hd=make_handoff_interval(x,mup);
+            if(hd.ok){ Kraw kr=krawczyk(hd.center,hd.radius,mup); if(kr.ok){ auto nr=newton_fixed(hd.center,mup); if(nr.ok){
                 x=nr.x; mu=mup; double ntx,ntm;tangent(x,ntx,ntm); if(ntx*tx+ntm*tmu<0){ntx=-ntx;ntm=-ntm;} tx=ntx;tmu=ntm;
-                relay<<step<<",NRII_Krawczyk_Newton,"<<std::setprecision(17)<<x0<<","<<mu0<<","<<x<<","<<mu<<","<<bt.center<<","<<bt.radius<<",1,"<<nr.iters<<",0,"<<std::abs(F(x,mu))<<"\n"; used=true;
+                relay<<step<<",NRII_Krawczyk_Newton,"<<std::setprecision(17)<<x0<<","<<mu0<<","<<x<<","<<mu<<","<<hd.center<<","<<hd.radius<<",1,"<<nr.iters<<",0,"<<std::abs(F(x,mu))<<"\n"; used=true;
             } } }
         }
         if(!used){
@@ -148,7 +148,7 @@ int main(int argc,char**argv){
     base<<"case,ok,x,residual,iters,note\n";
     auto direct=newton_fixed(-1.0,mu); base<<"Direct_Newton_FinalMu,"<<direct.ok<<","<<std::setprecision(17)<<direct.x<<","<<direct.res<<","<<direct.iters<<",converges_to_wrong_branch_if_x_negative\n";
     auto fold=newton_fixed(-1.0,-1.0,1e-14,100); base<<"Newton_Exact_Double_Root,"<<fold.ok<<","<<fold.x<<","<<fold.res<<","<<fold.iters<<",linearized_convergence_at_multiplicity_two\n";
-    auto bt=make_baton(-1.0,mu); if(bt.ok){ auto kr=krawczyk(bt.center,bt.radius,mu); base<<"NRII_Baton_FinalMu,"<<kr.ok<<","<<bt.center<<","<<std::abs(F(bt.center,mu))<<",0,"<<(kr.ok?"certified_but_lower_branch":"not_certified")<<"\n"; }
+    auto hd=make_handoff_interval(-1.0,mu); if(hd.ok){ auto kr=krawczyk(hd.center,hd.radius,mu); base<<"NRII_Handoff_FinalMu,"<<kr.ok<<","<<hd.center<<","<<std::abs(F(hd.center,mu))<<",0,"<<(kr.ok?"certified_but_lower_branch":"not_certified")<<"\n"; }
     base.close();
 
     std::ofstream pcont(outdir+"/NAIVE_PARAMETER_CONTINUATION.csv");
