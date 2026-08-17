@@ -1,0 +1,6 @@
+case,nrii_uses,gmres_uses,gmres_fail,bicgstab_uses,bicgstab_fail,picard_uses,picard_fail,newton_krylov_uses,newton_krylov_fail,thermal_newton_uses,thermal_newton_fail,semismooth_uses,semismooth_fail,fixed_point_uses,fixed_point_fail,aitken_uses,aitken_fail,anderson_uses,anderson_fail,handoffs
+weak-coupling,11,11,0,0,0,11,0,0,0,11,0,0,0,1,0,0,0,0,0,0
+skin-effect-contrast,11,11,1,1,0,11,0,0,0,11,0,0,0,1,0,0,0,0,0,1
+strong-convection,11,11,0,0,0,11,10,10,0,11,0,0,0,1,0,0,0,0,0,10
+phase-boundary,17,17,0,0,0,17,0,0,0,17,17,17,0,1,0,0,0,0,0,17
+strong-global-coupling,14,14,0,0,0,14,0,0,0,14,0,0,0,1,1,1,1,1,0,2
