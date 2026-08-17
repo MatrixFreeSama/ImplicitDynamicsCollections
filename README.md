@@ -152,8 +152,9 @@ The current experimental branches explore different parts of this interface conc
 - `experiment/solver-relay-kahan-ill-conditioned` studies a non-NRII relay in which reusable factorization and higher-precision residual information are transferred between numerical modules on a severely ill-conditioned Kahan system.
 - `experiment/nrii-semismooth-published-impacting-bar-relay` studies smooth NRII bulk evolution and semismooth unilateral-contact resolution on a published-parameter elastic-bar impact adaptation.
 - `experiment/nrii-zero-hysteresis-buck-sliding-relay` studies smooth fixed-switch NRII branches and projected semismooth resolution of a zero-hysteresis electrical sliding singularity.
+- `experiment/nrii-constrained-dynamics-singular-kkt-continuation` studies a dense constrained multibody adaptation in which a full-rank Newton/KKT continuation contract loses numerical rank at a three-link manipulator singular configuration while a Matrix-Free NRII implicit-midpoint path continues the smooth physical state through the same time point; an SVD pseudoinverse is retained as a singularity-aware control.
 
-These experiments support the architectural motivation for structured solver handoff and solver relay graphs, but they should not be read as evidence that USRI or UISRI dominates every standalone solver or every established continuation, interval, mixed-precision, or high-precision method.
+These experiments support the architectural motivation for structured solver handoff and solver relay graphs, but they should not be read as evidence that USRI or UISRI dominates every standalone solver or every established continuation, interval, mixed-precision, projection, null-space, pseudoinverse, regularized, or high-precision method.
 
 ## Experimental status
 
