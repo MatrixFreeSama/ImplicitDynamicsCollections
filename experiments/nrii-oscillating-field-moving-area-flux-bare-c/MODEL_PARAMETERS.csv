@@ -1,0 +1,10 @@
+parameter,value,unit
+field_vector_frequency,40000,Hz
+area_oscillation_frequency,37600,Hz
+surface_normal_rotation_frequency,39100,Hz
+magnetic_flux_density_amplitude,0.001,T
+mean_surface_area,9.9999999999999995e-07,m^2
+relative_area_modulation,0.14999999999999999,1
+time_step,1e-08,s
+duration,0.01,s
+NRII_order,16,1
