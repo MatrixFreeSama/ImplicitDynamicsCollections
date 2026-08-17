@@ -1,4 +1,4 @@
 case,ok,x,residual,iters,note
 Direct_Newton_FinalMu,1,-0.76629497497615107,0,5,converges_to_wrong_branch_if_x_negative
 Newton_Exact_Double_Root,1,-8.4099445552411744e-08,3.5527136788005009e-15,24,linearized_convergence_at_multiplicity_two
-NRII_Baton_FinalMu,1,-0.76629532224408026,3.9997606293695753e-07,0,certified_but_lower_branch
+NRII_Handoff_FinalMu,1,-0.76629532224408026,3.9997606293695753e-07,0,certified_but_lower_branch
