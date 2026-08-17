@@ -1,0 +1,6 @@
+gcc -O3 -march=native -std=c17 nrii_induction_multiphysics_relay.c -lm -o bench
+./bench
+
+Sanitizer validation:
+gcc -O1 -g -std=c17 -fsanitize=address,undefined -fno-omit-frame-pointer nrii_induction_multiphysics_relay.c -lm -o bench_san
+ASAN_OPTIONS=detect_leaks=1 ./bench_san
