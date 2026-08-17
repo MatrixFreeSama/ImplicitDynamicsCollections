@@ -126,7 +126,7 @@ This does **not** mean Newton methods are universally unable to solve switching 
 
 ## Projected semismooth relay
 
-When both smooth NRII candidates fail only the switching-domain gate, the relay passes a switching event to a projected semismooth solver for
+When both smooth NRII candidates fail only the switching-domain gate, the relay passes structured switching-event data to a projected semismooth solver for
 
 \[
 0\in s+N_{[0,1]}(d).
@@ -184,7 +184,7 @@ smooth ON/OFF implicit midpoint
         both branches invalid at switch
                      |
                      v
-             SwitchingEventBaton
+          switching-event handoff data
                      |
                      v
         projected semismooth solver
