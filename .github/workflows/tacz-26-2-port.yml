@@ -30,6 +30,7 @@ jobs:
         run: |
           python3 tools/tacz26_port.py work
           python3 tools/tacz26_pass4.py work
+          python3 tools/tacz26_pass5.py work
       - name: Compile or build
         shell: bash
         run: |
