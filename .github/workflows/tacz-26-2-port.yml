@@ -36,6 +36,7 @@ jobs:
           python3 tools/tacz26_pass4.py work
           python3 tools/tacz26_pass5.py work
           python3 tools/tacz26_pass6.py work
+          python3 tools/tacz26_pass6b.py work
       - name: Compile or build
         shell: bash
         run: |
