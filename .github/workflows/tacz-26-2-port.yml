@@ -26,11 +26,17 @@ jobs:
           distribution: temurin
           java-version: '25'
 
-      - name: Clone NeoForge 1.21.1 TACZ port
+      - name: Clone port bases
         run: |
           git clone --depth 1 https://github.com/RaeYNCreations/TACZ-1.21.1-neoforge-1.21.1.git work
-          cd work
-          git rev-parse HEAD | tee ../base-commit.txt
+          git clone --depth 1 --branch '26.2(main)' https://github.com/q14433686-arch/TaCZ_Refabricated_Unofficial.git fabric26
+          (cd work && git rev-parse HEAD) | tee base-commit.txt
+          (cd fabric26 && git rev-parse HEAD) | tee fabric26-commit.txt
+
+      - name: Snapshot 26.2 reference source
+        run: |
+          zip -qr TACZ-Fabric-26.2-reference-source.zip fabric26 \
+            -x 'fabric26/.git/*' 'fabric26/.gradle/*' 'fabric26/build/*' 'fabric26/run/*'
 
       - name: Apply 26.2 migration pass
         run: python3 tools/tacz26_port.py work
@@ -72,8 +78,10 @@ jobs:
             compile.log
             compile-status.txt
             base-commit.txt
+            fabric26-commit.txt
             port.diff
             TACZ-26.2-port-source.zip
+            TACZ-Fabric-26.2-reference-source.zip
             out/*.jar
 
       - name: Fail if compilation failed
