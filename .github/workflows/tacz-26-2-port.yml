@@ -27,7 +27,9 @@ jobs:
           (cd work && git rev-parse HEAD) > base-commit.txt
           (cd fabric26 && git rev-parse HEAD) > fabric26-commit.txt
       - name: Apply migration
-        run: python3 tools/tacz26_port.py work
+        run: |
+          python3 tools/tacz26_port.py work
+          python3 tools/tacz26_pass4.py work
       - name: Compile or build
         shell: bash
         run: |
