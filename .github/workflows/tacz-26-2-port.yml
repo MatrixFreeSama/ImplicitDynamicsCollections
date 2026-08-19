@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - ci/tacz-neoforge-26.2-port
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
