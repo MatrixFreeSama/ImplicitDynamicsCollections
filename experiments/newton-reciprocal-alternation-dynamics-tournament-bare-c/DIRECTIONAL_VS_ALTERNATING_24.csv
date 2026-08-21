@@ -1,0 +1,8 @@
+pair,directional_method,directional_contiguous_limit,alternating_method,alternating_24_contiguous_limit,alternating_over_directional
+Newton,Newton,38.094285887051917,Newton,38.094285887051917,1
+Newton<->LineSearch,Newton+LineSearch,774743753527.32153,Newton<->LineSearch,38.094285887051917,4.9170174930243582e-11
+Newton<->Aitken,Newton+Aitken,488.96638427146399,Newton<->Aitken,136.48012760689841,0.27911965320529575
+Newton<->Anderson,Newton+Anderson,2.9678412748283769,Newton<->Anderson,2.2993164891338513,0.77474375352732272
+Broyden<->Newton,Broyden->Newton,2.2993164891338513,Broyden<->Newton,38.094285887051917,16.567656547969161
+PseudoTransient<->Newton,PseudoTransient->Newton,801114.48685956118,PseudoTransient<->Newton,29.513310036077502,3.6840314986403828e-05
+NRII<->Newton,NRII->Newton,38.094285887051917,NRII<->Newton,2.9678412748283769,0.077907780805444457
