@@ -1,0 +1,8 @@
+method,alternation,contract
+Newton,single solver,24 full Newton stages
+Newton<->LineSearch,1:1,raw full Newton stage alternates with Armijo line-search Newton stage
+Newton<->Aitken,1:1,raw Newton stage alternates with Aitken-relaxed Newton-map stage; accelerated candidate kept only when better than raw candidate
+Newton<->Anderson,1:1,raw Newton stage alternates with depth-3 Anderson-combined Newton-map stage; accelerated candidate kept only when better than raw candidate
+Broyden<->Newton,1:1,inverse-Broyden stage alternates with exact-Jacobian Newton stage; Newton stage rebuilds inverse Jacobian for the next Broyden stage
+PseudoTransient<->Newton,1:1,shifted-Jacobian pseudo-transient stage alternates with exact Newton stage
+NRII<->Newton,1:1,re-anchored fixed-order NRII construction alternates with exact Newton; residual audits only accept/reject NRII handoff and never correct NRII coefficients
