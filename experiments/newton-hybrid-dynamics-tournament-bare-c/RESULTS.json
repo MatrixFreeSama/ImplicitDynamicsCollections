@@ -1,0 +1,16 @@
+{
+  "benchmark": "General Nonlinear Dynamics Newton Hybrid Tournament",
+  "NDOF": 128,
+  "stress_points": 121,
+  "max_iterations": 24,
+  "success_definition": {"relative_residual": 1e-12, "relative_branch_error": 1e-8},
+  "methods": [
+    {"name": "Newton", "contiguous_success_limit": 38.094285887051917, "first_failed_stress": 49.170174930243533, "farthest_isolated_success": 38.094285887051917, "successful_grid_points": 27},
+    {"name": "Newton+LineSearch", "contiguous_success_limit": 774743753527.32153, "first_failed_stress": 1000000000000, "farthest_isolated_success": 774743753527.32153, "successful_grid_points": 120},
+    {"name": "Newton+Aitken", "contiguous_success_limit": 488.96638427146399, "first_failed_stress": 631.13304501682501, "farthest_isolated_success": 488.96638427146399, "successful_grid_points": 37},
+    {"name": "Newton+Anderson", "contiguous_success_limit": 2.9678412748283769, "first_failed_stress": 3.8307392106307709, "farthest_isolated_success": 1000000000000, "successful_grid_points": 45},
+    {"name": "Broyden->Newton", "contiguous_success_limit": 2.2993164891338513, "first_failed_stress": 2.9678412748283769, "farthest_isolated_success": 1000000000000, "successful_grid_points": 74},
+    {"name": "PseudoTransient->Newton", "contiguous_success_limit": 801114.48685956118, "first_failed_stress": 1034038.0070341646, "farthest_isolated_success": 801114.48685956118, "successful_grid_points": 66},
+    {"name": "NRII->Newton", "contiguous_success_limit": 38.094285887051917, "first_failed_stress": 49.170174930243533, "farthest_isolated_success": 38.094285887051917, "successful_grid_points": 27}
+  ]
+}
