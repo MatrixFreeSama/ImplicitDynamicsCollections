@@ -1,0 +1,8 @@
+method,total_redirects,successful_redirects,failed_redirects,budget_deficit_triggers,nondecrease_triggers,invalid_triggers,total_newton_steps,total_specialist_steps,successful_grid_points,redirect_success_fraction
+Newton,0,0,0,0,0,0,2536,0,27,0.0
+Newton->Aitken->Newton,793,793,0,793,0,0,1709,793,30,1.0
+Newton->Anderson->Newton,815,813,2,811,4,0,1731,815,22,0.9975460122699387
+Newton->Broyden->Newton,821,102,719,821,0,0,1744,821,23,0.12423873325213154
+Newton->LineSearch->Newton,808,808,0,808,0,0,1728,808,27,1.0
+Newton->NRII->Newton,831,0,831,831,0,0,1755,831,21,0.0
+Newton->PseudoTransient->Newton,808,808,0,808,0,0,1729,808,27,1.0
