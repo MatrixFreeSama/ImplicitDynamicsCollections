@@ -185,16 +185,17 @@ The warning-clean optimized build emits zero compiler-warning bytes. A 24-stage 
 
 ## Files
 
-- `newton_information_deficiency_redirect_tournament.c`: complete C17 source.
+The GitHub branch keeps the complete compilable C17 source as a small wrapper plus three source include parts, together with the compact reproducibility summaries:
+
 - `CONVERGENCE_ENVELOPE_24_STAGES.csv`: primary convergence frontiers.
 - `CONVERGENCE_ENVELOPE_48_STAGES.csv`: 48-stage budget sensitivity.
 - `COMPOSITION_COMPARISON_24.csv`: directional vs fixed-alternation vs triggered-redirection comparison.
 - `GATE_DIAGNOSTICS.csv`: trigger reasons and redirect acceptance statistics.
 - `FAILED_SPECIALIST_POLICY_SENSITIVITY.csv`: repeated-retry vs fail-disable control.
 - `BUDGET_SENSITIVITY.csv`: 24-vs-48 triggered-redirection comparison.
-- `SPEED_SWEEP_24_STAGES.csv`, `SPEED_SWEEP_48_STAGES.csv`: full 121-point sweeps.
-- `TIMING.csv`: repeated easy/moderate-regime timing measurements.
-- `METHODS.csv`, `MODEL_PARAMETERS_24_STAGES.csv`, `RESULTS_24_STAGES.json`: machine-readable contracts and results.
+- `METHODS.csv`, `MODEL_PARAMETERS_24_STAGES.csv`: machine-readable contracts and parameters.
+
+The downloadable experiment archive additionally contains the complete monolithic C17 source, full 121-point 24/48-stage sweeps, repeated timing data, sanitizer records, and the combined JSON result. All omitted large tables are regenerated directly by the committed source.
 
 ## Limits
 
