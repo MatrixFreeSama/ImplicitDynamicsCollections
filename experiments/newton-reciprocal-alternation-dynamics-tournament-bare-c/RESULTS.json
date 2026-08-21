@@ -1,0 +1,36 @@
+{
+  "benchmark": "General Nonlinear Dynamics Newton Reciprocal Alternation Tournament",
+  "NDOF": 128,
+  "stress_grid": [0.05, 1000000000000.0, 121],
+  "success": {"relative_residual": 1e-12, "relative_branch_error": 1e-08},
+  "alternation": "strict 1:1",
+  "budgets": {
+    "24": {
+      "Newton": {"contiguous_success_limit": 38.09428588705192, "first_failed_stress": 49.17017493024353, "farthest_isolated_success": 38.09428588705192, "successful_grid_points": 27},
+      "Newton<->LineSearch": {"contiguous_success_limit": 38.09428588705192, "first_failed_stress": 49.17017493024353, "farthest_isolated_success": 38.09428588705192, "successful_grid_points": 27},
+      "Newton<->Aitken": {"contiguous_success_limit": 136.4801276068984, "first_failed_stress": 176.16163665149853, "farthest_isolated_success": 136.4801276068984, "successful_grid_points": 32},
+      "Newton<->Anderson": {"contiguous_success_limit": 2.2993164891338513, "first_failed_stress": 2.967841274828377, "farthest_isolated_success": 13052311120.852003, "successful_grid_points": 23},
+      "Broyden<->Newton": {"contiguous_success_limit": 38.09428588705192, "first_failed_stress": 49.17017493024353, "farthest_isolated_success": 38.09428588705192, "successful_grid_points": 27},
+      "PseudoTransient<->Newton": {"contiguous_success_limit": 29.513310036077502, "first_failed_stress": 38.09428588705192, "farthest_isolated_success": 29.513310036077502, "successful_grid_points": 26},
+      "NRII<->Newton": {"contiguous_success_limit": 2.967841274828377, "first_failed_stress": 3.830739210630771, "farthest_isolated_success": 2.967841274828377, "successful_grid_points": 17}
+    },
+    "48": {
+      "Newton": {"contiguous_success_limit": 4862.462362330365, "first_failed_stress": 6276.22015691268, "farthest_isolated_success": 4862.462362330365, "successful_grid_points": 46},
+      "Newton<->LineSearch": {"contiguous_success_limit": 4862.462362330365, "first_failed_stress": 6276.22015691268, "farthest_isolated_success": 4862.462362330365, "successful_grid_points": 46},
+      "Newton<->Aitken": {"contiguous_success_limit": 103982.25997917021, "first_failed_stress": 134215.03497866285, "farthest_isolated_success": 103982.25997917021, "successful_grid_points": 58},
+      "Newton<->Anderson": {"contiguous_success_limit": 2.2993164891338513, "first_failed_stress": 2.967841274828377, "farthest_isolated_success": 360273512286.4738, "successful_grid_points": 29},
+      "Broyden<->Newton": {"contiguous_success_limit": 4862.462362330365, "first_failed_stress": 6276.22015691268, "farthest_isolated_success": 4862.462362330365, "successful_grid_points": 46},
+      "PseudoTransient<->Newton": {"contiguous_success_limit": 3767.1623419771613, "first_failed_stress": 4862.462362330365, "farthest_isolated_success": 3767.1623419771613, "successful_grid_points": 45},
+      "NRII<->Newton": {"contiguous_success_limit": 38.09428588705192, "first_failed_stress": 49.17017493024353, "farthest_isolated_success": 38.09428588705192, "successful_grid_points": 27}
+    }
+  },
+  "directional_24_reference": {
+    "Newton": {"contiguous_success_limit": 38.09428588705192},
+    "Newton+LineSearch": {"contiguous_success_limit": 774743753527.3215},
+    "Newton+Aitken": {"contiguous_success_limit": 488.966384271464},
+    "Newton+Anderson": {"contiguous_success_limit": 2.967841274828377},
+    "Broyden->Newton": {"contiguous_success_limit": 2.2993164891338513},
+    "PseudoTransient->Newton": {"contiguous_success_limit": 801114.4868595612},
+    "NRII->Newton": {"contiguous_success_limit": 38.09428588705192}
+  }
+}
