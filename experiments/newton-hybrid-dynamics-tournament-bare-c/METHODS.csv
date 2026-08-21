@@ -1,0 +1,8 @@
+method,role,contract
+Newton,baseline,full-step exact-Jacobian Newton
+Newton+LineSearch,globalized Newton,Armijo residual line search
+Newton+Aitken,accelerated Newton,Aitken dynamic relaxation candidate accepted only when residual improves over raw Newton candidate
+Newton+Anderson,accelerated Newton,depth-3 Anderson candidate accepted only when residual improves over raw Newton candidate
+Broyden->Newton,quasi-Newton relay,dense inverse-Broyden phase then exact Newton terminal phase
+PseudoTransient->Newton,continuation relay,regularized pseudo-transient Newton phase then exact Newton when regularization vanishes
+NRII->Newton,independent constructive relay,fixed-order NRII implicit-Euler coefficient candidate; residual audit gates handoff; Newton is terminal corrector
