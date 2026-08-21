@@ -1,0 +1,11 @@
+Primary:
+gcc -O3 -march=native -std=c17 -Wall -Wextra -pedantic newton_information_deficiency_redirect_tournament.c -lm -o tournament
+./tournament
+
+48 dispatches:
+gcc -O3 -march=native -std=c17 -DMAX_STAGES=48 -DNO_TIMING newton_information_deficiency_redirect_tournament.c -lm -o tournament48
+./tournament48
+
+Disable future redirects after first failed specialist:
+gcc -O3 -march=native -std=c17 -DDISABLE_AFTER_SPECIALIST_FAILURE=1 -DNO_TIMING newton_information_deficiency_redirect_tournament.c -lm -o tournament_faildisable
+./tournament_faildisable
