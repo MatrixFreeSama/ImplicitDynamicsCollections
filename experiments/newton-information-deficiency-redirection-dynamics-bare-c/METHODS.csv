@@ -1,0 +1,8 @@
+method,composition,gate,contract
+Newton,standalone,none,raw Newton baseline
+Newton->LineSearch->Newton,triggered redirect,budget-projected Newton information gate,Armijo line-search Newton specialist; returns to Newton after one specialist dispatch
+Newton->Aitken->Newton,triggered redirect,budget-projected Newton information gate,Aitken-relaxed Newton-map specialist; better of raw and relaxed candidate is retained
+Newton->Anderson->Newton,triggered redirect,budget-projected Newton information gate,depth-3 Anderson Newton-map specialist; better of raw and accelerated candidate is retained
+Newton->Broyden->Newton,triggered redirect,budget-projected Newton information gate,inverse-Broyden specialist using secant-updated inverse information accumulated along Newton states
+Newton->PseudoTransient->Newton,triggered redirect,budget-projected Newton information gate,shifted-Jacobian pseudo-transient specialist with bounded shift search
+Newton->NRII->Newton,triggered redirect,budget-projected Newton information gate,re-anchored order-12 NRII specialist; residual is accept/reject audit only and never corrects NRII coefficients
