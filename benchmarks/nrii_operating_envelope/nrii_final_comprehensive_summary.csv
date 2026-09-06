@@ -1,0 +1,10 @@
+axis,points,range,min_speed_ratio,max_speed_ratio,finding
+baseline q,41,q sweep,0.03412196,2.5123764,NRII advantage collapses as q_eff rises
+size+sparsity,140,N × nonzeros/row,0.3965457,4.1951594,Wider local coupling tends to improve NRII relative economics
+smooth curvature,123,kappa 0..40 × 3 h,0.88272521,3.3741415,Curvature mainly raises q_eff and required order
+nonnormal pathology,45,gamma × bandwidth,3.219684,114.310096,"NRII can bypass GMRES stagnation, but transient growth can destroy accuracy"
+stiffness,31,S 1..2000,0.014922,0.478405,64-order practical failure sampled at S≈437.3; q_eff>1 first sampled at S≈563.5
+analytic families,85,5 families × strength,0.162965,0.981314,All accurate; cheap 1D direct Newton wins
+Newton preconditioning,52,4 preconditioners × 13 h,2.158142,7.867124,"Preconditioners change GMRES work, but none erased NRII lead in tested 2D case"
+2D/3D scaling,11,11 grid sizes,4.488025,5.929314,NRII wins across all tested 2D/3D sizes
+sparsity topology,44,4 equal-degree topologies × 11 h,0.748409,8.050834,Topology alone can move the crossover from strong NRII win to Newton win

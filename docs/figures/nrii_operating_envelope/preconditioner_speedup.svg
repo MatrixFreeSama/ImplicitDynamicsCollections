@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="500" viewBox="0 0 820 500">
+<rect width="100%" height="100%" fill="white"/>
+<text x="410.0" y="24" text-anchor="middle" font-family="sans-serif" font-size="17">Fair Preallocated 2D Test: Newton Preconditioners vs NRII</text>
+<line x1="85" y1="415" x2="775" y2="415" stroke="black"/>
+<line x1="85" y1="45" x2="85" y2="415" stroke="black"/>
+<line x1="85" y1="389.48" x2="775" y2="389.48" stroke="black" stroke-dasharray="4 4" stroke-width="1"/>
+<line x1="128.30" y1="415" x2="128.30" y2="420" stroke="black"/>
+<text x="128.30" y="435" text-anchor="middle" font-family="sans-serif" font-size="11">5.0e-03</text>
+<line x1="217.04" y1="415" x2="217.04" y2="420" stroke="black"/>
+<text x="217.04" y="435" text-anchor="middle" font-family="sans-serif" font-size="11">0.01</text>
+<line x1="394.51" y1="415" x2="394.51" y2="420" stroke="black"/>
+<text x="394.51" y="435" text-anchor="middle" font-family="sans-serif" font-size="11">0.02</text>
+<line x1="571.98" y1="415" x2="571.98" y2="420" stroke="black"/>
+<text x="571.98" y="435" text-anchor="middle" font-family="sans-serif" font-size="11">0.03</text>
+<line x1="749.44" y1="415" x2="749.44" y2="420" stroke="black"/>
+<text x="749.44" y="435" text-anchor="middle" font-family="sans-serif" font-size="11">0.04</text>
+<line x1="80" y1="389.48" x2="85" y2="389.48" stroke="black"/>
+<text x="76" y="393.48" text-anchor="end" font-family="sans-serif" font-size="11">1</text>
+<line x1="80" y1="343.03" x2="85" y2="343.03" stroke="black"/>
+<text x="76" y="347.03" text-anchor="end" font-family="sans-serif" font-size="11">2</text>
+<line x1="80" y1="250.14" x2="85" y2="250.14" stroke="black"/>
+<text x="76" y="254.14" text-anchor="end" font-family="sans-serif" font-size="11">4</text>
+<line x1="80" y1="157.24" x2="85" y2="157.24" stroke="black"/>
+<text x="76" y="161.24" text-anchor="end" font-family="sans-serif" font-size="11">6</text>
+<line x1="80" y1="64.35" x2="85" y2="64.35" stroke="black"/>
+<text x="76" y="68.35" text-anchor="end" font-family="sans-serif" font-size="11">8</text>
+<polyline points="110.56,272.58 163.80,282.54 217.04,275.99 270.28,293.92 323.52,295.56 376.76,311.40 430.00,299.75 483.24,290.08 536.48,306.95 589.72,251.15 642.96,326.91 696.20,322.59 749.44,335.69" fill="none" stroke="black" stroke-width="1.5"/>
+<polyline points="110.56,74.19 163.80,70.52 217.04,126.73 270.28,173.26 323.52,166.29 376.76,200.56 430.00,204.77 483.24,199.37 536.48,231.83 589.72,233.30 642.96,250.38 696.20,242.06 749.44,271.93" fill="none" stroke="black" stroke-width="1.75" stroke-dasharray="8 5"/>
+<polyline points="110.56,182.19 163.80,178.44 217.04,214.85 270.28,247.78 323.52,228.56 376.76,218.56 430.00,241.72 483.24,240.13 536.48,268.98 589.72,268.99 642.96,290.90 696.20,271.20 749.44,291.18" fill="none" stroke="black" stroke-width="2.0" stroke-dasharray="2 4"/>
+<polyline points="110.56,285.34 163.80,239.36 217.04,269.37 270.28,292.11 323.52,290.83 376.76,287.81 430.00,289.81 483.24,289.10 536.48,310.36 589.72,310.24 642.96,327.82 696.20,312.96 749.44,328.47" fill="none" stroke="black" stroke-width="1.5" stroke-dasharray="12 4 2 4"/>
+<line x1="595" y1="59" x2="623" y2="59" stroke="black" stroke-width="1.5"/><text x="631" y="63" font-family="sans-serif" font-size="11">jacobi</text>
+<line x1="595" y1="77" x2="623" y2="77" stroke="black" stroke-width="1.5" stroke-dasharray="8 5"/><text x="631" y="81" font-family="sans-serif" font-size="11">jacobi4</text>
+<line x1="595" y1="95" x2="623" y2="95" stroke="black" stroke-width="1.5" stroke-dasharray="2 4"/><text x="631" y="99" font-family="sans-serif" font-size="11">line_x</text>
+<line x1="595" y1="113" x2="623" y2="113" stroke="black" stroke-width="1.5" stroke-dasharray="12 4 2 4"/><text x="631" y="117" font-family="sans-serif" font-size="11">none</text>
+<text x="430.0" y="485" text-anchor="middle" font-family="sans-serif" font-size="13">Implicit step h</text>
+<text x="20" y="230.0" text-anchor="middle" transform="rotate(-90 20 230.0)" font-family="sans-serif" font-size="13">Speedup = Newton-GMRES / NRII</text>
+</svg>
