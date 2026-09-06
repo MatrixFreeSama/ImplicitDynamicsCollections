@@ -1,0 +1,3 @@
+model,points,valid_points,invalid_points,median_valid_speedup,max_valid_q,min_invalid_q,max_valid_residual,max_valid_difference
+impact_ionization,72,65,7,2.02616366,0.608086346,0.693114103,9.844e-10,8.898e-09
+combined_pin_electrothermal_traps,72,67,5,0.666315954,0.676116727,0.608884816,1.833e-09,2.973e-08

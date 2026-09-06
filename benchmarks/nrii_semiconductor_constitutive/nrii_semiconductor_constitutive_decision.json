@@ -1,0 +1,21 @@
+{
+  "main_validated_points": 1800,
+  "boundary_stress_points": 144,
+  "total_measured_points": 1944,
+  "main_accuracy_failures": 0,
+  "leading_median_speedups": {
+    "field_mobility": 2.832716055,
+    "radiative": 2.733563305,
+    "heterojunction_interface": 2.6356373250000003,
+    "impact_ionization": 2.487545195,
+    "auger": 2.1373534899999997,
+    "trap_1": 1.848781345
+  },
+  "new_feature": "coefficient-algebra density",
+  "impact_valid_points": 65,
+  "impact_max_valid_q": 0.608086346,
+  "impact_min_failed_q": 0.693114103,
+  "combined_valid_median_speedup": 0.666315954,
+  "interpretation": "Locality and low q are necessary but not sufficient. Per-order constitutive algebra cost is an independent performance coordinate.",
+  "limitations": "Normalized controlled benchmark; no production Poisson-Scharfetter-Gummel TCAD or production AMG/ILU baseline."
+}
