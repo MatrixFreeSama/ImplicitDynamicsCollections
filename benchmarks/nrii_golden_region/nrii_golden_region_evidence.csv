@@ -1,0 +1,16 @@
+scenario,evidence_set,points,reference_solver,min_speedup,median_speedup,max_speedup,qeff_min,qeff_max,classification,qualification
+nonlinear_heat_kT,3D localization 2026-09-06,12,Newton-GMRES,1.64339864,2.34493092,3.08538336,0.000119823353,0.00140423981,favorable,Concrete smooth local face-flux model
+allen_cahn,3D localization 2026-09-06,12,Newton-PCG,0.383951881,1.147428685,1.59881284,0.00729855006,0.0224585837,mixed,Localizable but favorable PCG can be cheaper
+reaction_diffusion_7pt,3D localization h-sweep,14,Newton-GMRES,0.883826074,2.06109926,2.76996136,0.00569456956,0.024684786,favorable-mixed,Local 7-point operator; timing not uniform at every point
+fourth_order_phasefield_proxy,3D localization h-sweep,14,Newton-GMRES,1.48788074,1.89981871,2.19591709,0.00464961997,0.0199391708,favorable,Local radius-2 operator
+twofield_multiphysics_proxy,3D localization h-sweep,14,Newton-GMRES,1.9776091,2.59891359,3.24480274,0.0040287413,0.0170200173,favorable,Local block multiphysics proxy
+vector_solid_proxy,3D localization h-sweep,14,Newton-GMRES,1.82467213,2.56983144,3.25079301,0.00528756976,0.0227663827,favorable,Smooth local vector coupling proxy
+global_mean_negative_control,3D localization h-sweep,14,Newton-GMRES,1.24051278,1.429307785,2.13269543,0.0188090054,0.080771624,structural-negative-control,True nonlocal term forces NRII global reduction per coefficient order
+reaction_diffusion_pcg_control,PCG fairness control,8,Newton-PCG,1.30181385,,2.49680061,0.00569456956,0.024684786,favorable,Symmetric case with more appropriate Krylov baseline
+fourth_order_pcg_control,PCG fairness control,8,Newton-PCG,1.0095731,,1.76959356,0.00464961997,0.0199391708,weak-favorable,PCG narrows the margin substantially
+vector_solid_pcg_control,PCG fairness control,8,Newton-PCG,1.24692682,,2.58213568,0.00528756976,0.0227663827,favorable,Local vector coupling remains competitive under PCG control
+localized_hotspot_active_sparse,prior 3D hotspot study,6,Newton-GMRES,13.67,,22.08,,,strong-favorable,Online active-sparse coefficient support; controlled smooth localized benchmark
+localized_hotspot_full_nrii,prior 3D hotspot study,6,Newton-GMRES,1.2,,2.4,,,moderate-favorable,Shows that most of the large hotspot gain comes from spatial activity pruning
+nonnormal_pathology,existing operating-envelope suite,45,restarted GMRES,3.22,,114.31,,,pathological-separation,Controlled Krylov-stagnation existence case; not representative engineering speedup
+multidimensional_matrix_free,existing 572-point suite,11,Newton-Krylov,4.49,,5.93,,,favorable,Controlled 2D/3D matrix-free scaling set
+preconditioner_sweep,existing 572-point suite,52,Newton-GMRES with tested preconditioners,2.16,,7.87,,,favorable-with-limits,Does not include production AMG or ILU/ILUT

@@ -1,0 +1,10 @@
+3D scenario,Can NRII remove solver-induced globality?,Operator structure,Status,Measured/structural result
+Nonlinear heat conduction k(T),Yes,Local face flux,Confirmed,1.64-3.09x in current Newton-GMRES test
+Reaction-diffusion,Yes,7-point local stencil,Confirmed,NRII remains local; PCG control still often faster for NRII by 1.3-2.5x
+Fourth-order phase-field-like operator,Yes,Radius-2 local operator,Confirmed,Localizable; PCG narrows advantage to ~1.0-1.8x
+Smooth vector solid-like coupling,Yes,Local vector stencil + local constitutive coupling,Confirmed proxy,PCG control still leaves ~1.25-2.58x in tested region
+Two-field local multiphysics,Yes,Local block operator,Confirmed proxy,About 2-3x in current GMRES tests
+Localized hotspot dynamics,"Yes, spatially adaptive",Local stencil and local coefficient support,Previously confirmed,Active-sparse NRII reached ~13.7-22.1x vs Newton-GMRES
+Global mean-field coupling,"No, not fully",True global reduction,Negative control,NRII itself needs a global reduction at every coefficient order
+Incompressible pressure constraint / pressure Poisson,"No, not without reformulation",True elliptic global constraint,Structural exclusion,"Matrix-free can hide storage, not the global solve"
+Quasi-static electrostatics / gravity / dense BEM,Generally no,True long-range/global inverse,Structural exclusion,NRII cannot create locality that the physical operator does not possess

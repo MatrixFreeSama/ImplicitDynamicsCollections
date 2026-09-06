@@ -1,0 +1,8 @@
+scenario,points,min_speedup,max_speedup,median_speedup,min_qeff,max_qeff,max_residual,notes
+fourth_order_phasefield_proxy,14,1.48788074,2.19591709,1.89981871,0.00464961997,0.0199391708,9.912e-15,NRII requires no global reductions
+global_mean_negative_control,14,1.24051278,2.13269543,1.429307785,0.0188090054,0.080771624,3.057e-13,True nonlocal term: NRII also requires one global reduction per coefficient order
+reaction_diffusion_7pt,14,0.883826074,2.76996136,2.0610992599999998,0.00569456956,0.024684786,1.36e-14,NRII requires no global reductions
+twofield_multiphysics_proxy,14,1.9776091,3.24480274,2.59891359,0.0040287413,0.0170200173,1.115e-14,NRII requires no global reductions
+vector_solid_proxy,14,1.82467213,3.25079301,2.5698314399999997,0.00528756976,0.0227663827,8.255e-15,NRII requires no global reductions
+allen_cahn,12,0.383951881,1.59881284,1.147428685,0.00729855006,0.0224585837,3.573e-14,Concrete smooth 3D model; Newton baseline = Newton-PCG
+nonlinear_heat_kT,12,1.64339864,3.08538336,2.34493092,0.000119823353,0.00140423981,4.741e-16,Concrete smooth 3D model; Newton baseline = Newton-GMRES
