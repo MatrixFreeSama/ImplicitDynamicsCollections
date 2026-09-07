@@ -1,0 +1,15 @@
+{
+  "device": "24 um physical-unit Si PIN, 300 K",
+  "bare_n121_max_valid_dt_s": 3.2056679893799998e-15,
+  "contact_resolvent_n121_max_valid_dt_s": 6.87634830584e-13,
+  "contact_resolvent_measured_gain_n121": 214.50594162029665,
+  "transport_contact_resolvent_max_tested_dt_s": 1e-09,
+  "transport_contact_resolvent_boundary_reached": false,
+  "transport_contact_resolvent_n121_q_at_1ns": 0.144102617,
+  "transport_contact_resolvent_n121_order_at_1ns": 11,
+  "transport_contact_resolvent_n121_residual_at_1ns": 9.21e-10,
+  "transport_contact_resolvent_n121_rel_diff_at_1ns": 4.62e-13,
+  "core_result": "The femtosecond and subsequent transport limits are representation-level fast linear spectra in the tested device. An algebraically equivalent resolvent transformation removes them from coefficient depth without changing the target implicit equation.",
+  "runtime_boundary": "The exact 1D transport resolvent requires linear solves per coefficient order and is slower than the structured O(N) direct Newton baseline.",
+  "next_problem": "Construct a locality-preserving approximate resolvent for 3D that approaches the exact 1D spectral result without reintroducing a large global solve."
+}
