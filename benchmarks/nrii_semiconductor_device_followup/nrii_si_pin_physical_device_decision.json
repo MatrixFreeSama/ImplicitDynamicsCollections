@@ -1,0 +1,13 @@
+{
+  "device": "24 um physical-unit Si PIN, 300 K",
+  "breakdown_961_node_V": -483.718360297145,
+  "breakdown_linear_dx_extrapolation_V": -483.1213802881955,
+  "breakdown_quadratic_dx_extrapolation_V": -483.18028236988135,
+  "q_dt_fit_tau_s": 4.942425592653741e-15,
+  "q_dt_fit_R2": 0.9999998048088943,
+  "physical_charge_relaxation_tau_s": 4.541682138182293e-15,
+  "fit_vs_physical_tau_percent": 8.823679030779473,
+  "main_finding": "Full-domain NRII is limited by the few-femtosecond charge-relaxation mode of the heavily doped contacts; direct O(N) block-Newton is faster in this 1D structured problem.",
+  "contact_condensation": "Moves the coefficient radius outward but is only an approximate seed under the current freezing model.",
+  "relay": "Restores full-system accuracy but is not faster than direct structured Newton in the current 1D benchmark."
+}

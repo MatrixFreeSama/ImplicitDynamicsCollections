@@ -1,0 +1,22 @@
+{
+  "broad_points": 360,
+  "focus_points": 30,
+  "total_points": 390,
+  "max_nrii_residual": 1.426e-12,
+  "focus_24_heterojunction_speedups": {
+    "vs_block_newton": 3.71630286,
+    "vs_reduced_newton": 1.39455974,
+    "vs_segregated": 1.08650304
+  },
+  "focus_24_combined_speedups": {
+    "vs_block_newton": 4.06885335,
+    "vs_reduced_newton": 1.32925157,
+    "vs_segregated": 1.25551156
+  },
+  "focus_24_poisson_iterations": {
+    "nrii": 597.0,
+    "reduced_newton": 995.0,
+    "segregated": 984.0
+  },
+  "core_interpretation": "Physical Poisson globality remains. NRII removes the globally coupled carrier/block correction and reduces cumulative scalar Poisson inversion depth, but is not global-free."
+}
